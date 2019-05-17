@@ -1,7 +1,7 @@
 mod com;
 use crate::com::mambro::domain::{
-    Account, AccountId, ConfigId, Credentials, FileLocation, FileName, FolderName, IMaybeEmpty,
-    Key, Secret, ThirdPartyId, Token, URI,
+    Account, AccountId, ConfigId, Credentials, FileLocation, FileLocationIntentions, FileName,
+    FolderName, IMaybeEmpty, Key, Secret, ThirdPartyId, Token, URI,
 };
 use std::collections::HashMap;
 use std::error::Error;
@@ -25,6 +25,7 @@ fn build(map: HashMap<String, String>) -> result::Result<Account, Box<Error>> {
             },
         },
         location: FileLocation {
+            intent: FileLocationIntentions::ReadFrom,
             folder: FolderName(String::from("1")),
             name: FileName(String::from("2")),
         },
@@ -32,7 +33,7 @@ fn build(map: HashMap<String, String>) -> result::Result<Account, Box<Error>> {
     if account.is_empty() {
         return Err(Box::from("Account is empty."));
     }
-    return Ok(account);
+    Ok(account)
 }
 
 fn main() {

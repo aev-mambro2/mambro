@@ -26,31 +26,31 @@ impl IMaybeEmpty for AccountId {
 }
 
 impl IMaybeEmpty for FileName {
-    fn is_empty(&self) ->  bool {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
 
 impl IMaybeEmpty for FileExtension {
-    fn is_empty(&self) -> bool  {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
 
 impl IMaybeEmpty for FolderName {
-    fn is_empty(&self) -> bool  {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
 
 impl IMaybeEmpty for Key {
-    fn is_empty(&self) -> bool  {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
 
 impl IMaybeEmpty for Secret {
-    fn is_empty(&self) -> bool  {
+    fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
@@ -66,7 +66,6 @@ impl IMaybeEmpty for URI {
         self.0.is_empty()
     }
 }
-
 
 #[derive(Debug)]
 pub struct ConfigId {
@@ -103,7 +102,18 @@ impl IMaybeEmpty for Credentials {
 }
 
 #[derive(Debug)]
+pub enum FileLocationIntentions {
+    None,
+    ReadFrom,
+    WriteTo,
+    ForwardTo,
+    LogRequestsTo,
+    LogResponsesTo,
+}
+
+#[derive(Debug)]
 pub struct FileLocation {
+    pub intent: FileLocationIntentions,
     pub folder: FolderName,
     pub name: FileName,
 }
@@ -116,15 +126,6 @@ impl FileLocation {
     fn extension(&self) -> FileExtension {
         FileExtension(String::from(""))
     }
-}
-
-pub enum FileLocationTypes {
-    None,
-    ReadFrom,
-    WriteTo,
-    ForwardTo,
-    LogRequestsTo,
-    LogResponsesTo,
 }
 
 #[derive(Debug)]
