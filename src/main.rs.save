@@ -1,0 +1,39 @@
+mod com;
+use std::collections::HashMap;
+use crate::com::mambro::domain::{
+    AccountId,
+    ThirdPartyId,
+    ConfigId,
+    Key,
+    Secret,
+    Token,
+    Credentials,
+    FolderName,
+    FileName,
+    FileLocation
+    Account
+};
+
+
+fn main() {
+    let account = Account {
+        config_id: ConfigId {
+            account_id: AccountId(String::from("a")),
+            third_party_id: ThirdPartyId(String::from("b"))
+        },
+        credentials: Credentials {
+            uri: String::from("https://here/"),
+            app: Token {
+                    key: Key(String::from("a")),
+                    secret: Secret(String::from("b"))
+                 },
+            user: Token {
+                    key: Key(String::from("a")),
+                    secret: Secret(String::from("b"))
+                 }
+        },
+        locations: HashMap
+    };
+    println!("{:#?}", account);
+}
+
