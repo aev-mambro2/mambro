@@ -1,4 +1,6 @@
 mod com;
+extern crate secstr;
+use secstr::*;
 use crate::com::mambro::domain::{
     Account, AccountId, ConfigId, Credentials, FileLocation, FileLocationIntentions, FileName,
     FolderName, IMaybeEmpty, Key, Secret, ThirdPartyId, Token, URI,
@@ -16,12 +18,12 @@ fn build(map: HashMap<String, String>) -> result::Result<Account, Box<Error>> {
         credentials: Credentials {
             uri: URI(String::from("https://here/")),
             app: Token {
-                key: Key(String::from("a")),
-                secret: Secret(String::from("b")),
+                key: Key(SecStr::from("a")),
+                secret: Secret(SecStr::from("b")),
             },
             user: Token {
-                key: Key(String::from("a")),
-                secret: Secret(String::from("b")),
+                key: Key(SecStr::from("a")),
+                secret: Secret(SecStr::from("b")),
             },
         },
         location: FileLocation {

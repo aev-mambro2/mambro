@@ -1,3 +1,6 @@
+extern crate secstr;
+use secstr::*;
+
 #[derive(Debug)]
 pub struct AccountId(pub String);
 #[derive(Debug)]
@@ -7,9 +10,9 @@ pub struct FileName(pub String);
 #[derive(Debug)]
 pub struct FolderName(pub String);
 #[derive(Debug)]
-pub struct Key(pub String);
+pub struct Key(pub SecStr);
 #[derive(Debug)]
-pub struct Secret(pub String);
+pub struct Secret(pub SecStr);
 #[derive(Debug)]
 pub struct ThirdPartyId(pub String);
 #[derive(Debug)]
@@ -45,13 +48,13 @@ impl IMaybeEmpty for FolderName {
 
 impl IMaybeEmpty for Key {
     fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.0.unsecure().len() == 0
     }
 }
 
 impl IMaybeEmpty for Secret {
     fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.0.unsecure().len() == 0
     }
 }
 

@@ -5,3 +5,5 @@ authors = ["dave"]
 edition = "2018"
 
 [dependencies]
+component = "0.1.0"
+secstr = "0.3.2"
