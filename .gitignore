@@ -13,7 +13,7 @@ Cargo.lock
 .env
 
 #And something creates swap files, so we ignore those, too.
-**/*.swp
+*.swp
 
 #And we don't want the contents of our data going out to public source control either.
 data/*.*

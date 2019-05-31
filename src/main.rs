@@ -1,16 +1,23 @@
+mod com;
+#[macro_use]
 extern crate diesel;
+extern crate dotenv;
 
-use crate::com::mambro::*;
-use crate::com::mambro::models::*;
+use crate::com::mambro::db as db;
+use crate::com::mambro::models as models;
+use crate::com::mambro::schema as schema;
+use db::*;
+use models::*;
+use schema::*;
 use self::diesel::prelude::*;
 
 fn main() {
-    use crate::com::mambro::schema::accounts::dsl::*;
+    use schema::accounts::dsl::*;
 
-    let connection = establish_connection();
-    let results = accounts.filter(id.eq("1"))
+    let connection = db::establish_connection();
+    let results = schema::accounts.filter(id.eq("1"))
         .limit(5)
-        .load::<accounts>(&connection)
+        .load::<models::accounts>(&connection)
         .expect("Error loading accounts");
 
     println!("Displaying {} accounts", results.len());
