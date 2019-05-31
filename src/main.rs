@@ -15,15 +15,15 @@ fn main() {
     use schema::accounts::dsl::*;
 
     let connection = db::establish_connection();
-    let results = schema::accounts.filter(id.eq("1"))
+    let results = accounts.filter(id.eq("1"))
         .limit(5)
-        .load::<models::accounts>(&connection)
+        .load::<models::Accounts>(&connection)
         .expect("Error loading accounts");
 
     println!("Displaying {} accounts", results.len());
     for acc in results {
         println!("{}", acc.id);
         println!("----------\n");
-        println!("{}", acc.thirdParty);
+        println!("{}", acc.third_party);
     }
 }

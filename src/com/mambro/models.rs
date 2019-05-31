@@ -1,16 +1,16 @@
 #[derive(Queryable)]
-
-pub struct thirdParties {
+pub struct ThirdParties {
     pub id: String,
-    pub insertedAt: String,
-    pub modifiedAt: String,
-    pub version: usize,
+    pub inserted_at: String,
+    pub modified_at: String,
+    pub version: i32,
 }
 
-pub struct accounts {
+#[derive(Queryable)]
+pub struct Accounts {
     pub id: String,
-    pub thirdParty: String,
-    pub insertedAt: String,
-    pub modifiedAt: String,
-    pub version: usize,
+    pub third_party: String,
+    pub inserted_at: String,
+    pub modified_at: String,
+    pub version: i32,
 }
