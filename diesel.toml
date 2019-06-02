@@ -3,3 +3,4 @@
 
 [print_schema]
 file = "src/com/mambro/db/schema.rs"
+with_docs = true

@@ -4,18 +4,15 @@ extern crate diesel;
 extern crate dotenv;
 
 use crate::com::mambro::db as db;
-use crate::com::mambro::models as models;
-use crate::com::mambro::schema as schema;
-use db::*;
-use models::*;
-use schema::*;
+use db::models as models;
+use db::schema as schema;
 use self::diesel::prelude::*;
 
 fn main() {
     use schema::accounts::dsl::*;
 
-    let connection = db::establish_connection();
-    let results = accounts.filter(id.eq("1"))
+    let connection = db::connect();
+    let results = accounts.filter(thirdParty.eq("Joor"))
         .limit(5)
         .load::<models::Accounts>(&connection)
         .expect("Error loading accounts");
