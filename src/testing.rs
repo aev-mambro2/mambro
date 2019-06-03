@@ -26,11 +26,11 @@ fn build(data: HashMap<&str, &str>) -> result::Result<Account, Box<Error>> {
                 secret: Secret(SecStr::from(data.get("user_token").unwrap_or(&"").to_string())),
             },
         },
-        location: FileLocation {
+        locations.add(FileLocation {
             intent: FileLocationIntentions::ReadFrom,
             folder: FolderName(data.get("readfrom_folder").unwrap_or(&"").to_string()),
             name: FileName(data.get("readfrom_name").unwrap_or(&"").to_string()),
-        },
+        }),
     };
     if account.is_empty() {
         return Err(Box::from("Account is empty."));

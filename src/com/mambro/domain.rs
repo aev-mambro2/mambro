@@ -135,7 +135,7 @@ impl FileLocation {
 pub struct Account {
     pub config_id: ConfigId,
     pub credentials: Credentials,
-    pub location: FileLocation,
+    pub locations: Vec<FileLocation>,
 }
 impl IMaybeEmpty for Account {
     fn is_empty(&self) -> bool {

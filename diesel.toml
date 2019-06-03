@@ -2,5 +2,5 @@
 # see diesel.rs/guides/configuring-diesel-cli
 
 [print_schema]
-file = "src/com/mambro/db/schema.rs"
+file = "/home/dave/dev/mambro/src/com/mambro/db/schema.rs"
 with_docs = true
