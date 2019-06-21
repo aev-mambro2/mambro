@@ -1,26 +1,23 @@
-mod com;
+#![recursion_limit = "128"]
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
 
-use crate::com::mambro::db as db;
-use db::models as models;
-use db::schema as schema;
-use self::diesel::prelude::*;
+mod com;
+use crate::com::mambro::domain;
+
+fn nope_main() {
+    match domain::attempt_load_account(String::from("one"), String::from("two")) {
+        None => {}
+        Some(ref account) => {
+            println!("3rd party: {:?}", account.config_id.third_party_id);
+        }
+    }
+}
 
 fn main() {
-    use schema::accounts::dsl::*;
-
-    let connection = db::connect();
-    let results = accounts.filter(thirdParty.eq("Joor"))
-        .limit(5)
-        .load::<models::Accounts>(&connection)
-        .expect("Error loading accounts");
-
-    println!("Displaying {} accounts", results.len());
-    for acc in results {
-        println!("{}", acc.id);
-        println!("----------\n");
-        println!("{}", acc.third_party);
-    }
+    let a = domain::AccountId("one".to_string());
+    let t = domain::ThirdPartyId("two".to_string());
+    println!("{:?}", a);
+    println!("{:?}", t);
 }
