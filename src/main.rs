@@ -7,7 +7,7 @@ mod com;
 use crate::com::mambro::domain;
 
 fn nope_main() {
-    match domain::attempt_load_account(String::from("one"), String::from("two")) {
+    match domain::attempt_load_account("one", "two") {
         None => {}
         Some(ref account) => {
             println!("3rd party: {:?}", account.config_id.third_party_id);
@@ -16,8 +16,8 @@ fn nope_main() {
 }
 
 fn main() {
-    let a = domain::AccountId("one".to_string());
-    let t = domain::ThirdPartyId("two".to_string());
+    let a = domain::AccountId::from("one");
+    let t = domain::ThirdPartyId::from("two");
     println!("{:?}", a);
     println!("{:?}", t);
 }

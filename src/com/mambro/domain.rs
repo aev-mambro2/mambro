@@ -6,67 +6,92 @@ use db::models;
 use secstr::*;
 
 #[derive(Debug)]
-pub struct AccountId(pub String);
-impl From<String> for AccountId {
-    fn from(s: String) -> Self {
-        AccountId(s)
+pub struct AccountId(pub Vec<u8>);
+impl From<&str> for AccountId {
+    fn from(s: &str) -> Self {
+        AccountId(s.as_bytes().to_vec())
     }
 }
 impl AccountId {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
+    }
+}
+impl From<&String> for AccountId {
+    fn from(s: &String) -> Self {
+        AccountId(s.into_bytes().clone())
     }
 }
 
 #[derive(Debug)]
-pub struct FileExtension(pub String);
-impl From<String> for FileExtension {
-    fn from(s: String) -> Self {
-        FileExtension(s)
+pub struct FileExtension(pub Vec<u8>);
+impl From<&str> for FileExtension {
+    fn from(s: &str) -> Self {
+        FileExtension(s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for FileExtension {
+    fn from(s: &String) -> Self {
+        FileExtension(s.into_bytes().clone())
     }
 }
 impl FileExtension {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug)]
-pub struct FileName(pub String);
-impl From<String> for FileName {
-    fn from(s: String) -> Self {
-        FileName(s)
+pub struct FileName(pub Vec<u8>);
+impl From<&str> for FileName{
+    fn from(s: &str) -> Self {
+        FileName(s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for FileName {
+    fn from(s: &String) -> Self {
+        FileName(s.into_bytes().clone())
     }
 }
 impl FileName {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug)]
-pub struct FileLocationPurpose(pub String);
-impl From<String> for FileLocationPurpose {
-    fn from(s: String) -> Self {
-        FileLocationPurpose(s)
+pub struct FileLocationPurpose(pub Vec<u8>);
+impl From<&str> for FileLocationPurpose{
+    fn from(s: &str) -> Self {
+        FileLocationPurpose(s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for FileLocationPurpose {
+    fn from(s: &String) -> Self {
+        FileLocationPurpose(s.into_bytes().clone())
     }
 }
 impl FileLocationPurpose {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug)]
-pub struct FolderName(pub String);
-impl From<String> for FolderName {
-    fn from(s: String) -> Self {
-        FolderName(s)
+pub struct FolderName(pub Vec<u8>);
+impl From<&str> for FolderName {
+    fn from(s: &str) -> Self {
+        FolderName (s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for FolderName {
+    fn from(s: &String) -> Self {
+        FolderName(s.into_bytes().clone())
     }
 }
 impl FolderName {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
@@ -75,28 +100,38 @@ pub type Key = SecStr;
 pub type Secret = SecStr;
 
 #[derive(Debug)]
-pub struct ThirdPartyId(pub String);
-impl From<String> for ThirdPartyId {
-    fn from(s: String) -> Self {
-        ThirdPartyId(s)
+pub struct ThirdPartyId(pub Vec<u8>);
+impl From<&str> for ThirdPartyId {
+    fn from(s: &str) -> Self {
+        ThirdPartyId(s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for ThirdPartyId {
+    fn from(s: &String) -> Self {
+        ThirdPartyId(s.into_bytes().clone())
     }
 }
 impl ThirdPartyId {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug)]
-pub struct URI(pub String);
-impl From<String> for URI {
-    fn from(s: String) -> Self {
-        URI(s)
+pub struct URI(pub Vec<u8>);
+impl From<&str> for URI {
+    fn from(s: &str) -> Self {
+        URI(s.as_bytes().to_vec())
+    }
+}
+impl From<&String> for URI {
+    fn from(s: &String) -> Self {
+        URI(s.into_bytes().clone())
     }
 }
 impl URI {
     fn to_string(&self) -> String {
-        self.0
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
@@ -165,8 +200,8 @@ impl IMaybeEmpty for ConfigId {
 impl From<&models::Accounts> for ConfigId {
     fn from(acc: &models::Accounts) -> Self {
         ConfigId {
-            account_id: AccountId::from(acc.id),
-            third_party_id: ThirdPartyId::from(acc.third_party),
+            account_id: AccountId::from(&acc.id),
+            third_party_id: ThirdPartyId::from(&acc.third_party),
         }
     }
 }
@@ -187,7 +222,7 @@ impl IMaybeEmpty for Token {
     }
 }
 impl Token {
-    fn from(key: String, secret: String) -> Self {
+    fn from(key: &String, secret: &String) -> Self {
         Token {
             key: Key::from(key),
             secret: Secret::from(secret),
@@ -209,9 +244,9 @@ impl IMaybeEmpty for domain::Credentials {
 impl From<&models::Credentials> for domain::Credentials {
     fn from(creds: &models::Credentials) -> Self {
         domain::Credentials {
-            uri: URI::from(creds.uri),
-            app: Token::from(creds.app_key, creds.app_secret),
-            user: Token::from(creds.user_key, creds.user_secret),
+            uri: URI::from(&creds.uri),
+            app: Token::from(&creds.app_key, &creds.app_secret),
+            user: Token::from(&creds.user_key, &creds.user_secret),
         }
     }
 }
@@ -229,7 +264,7 @@ impl IMaybeEmpty for FileLocation {
 }
 impl FileLocation {
     fn extension(&self) -> FileExtension {
-        FileExtension("".to_string())
+        FileExtension::from("")
     }
     fn to_string(&self) -> String {
         [self.folder.to_string(), self.name.to_string()].join("/")
@@ -238,9 +273,9 @@ impl FileLocation {
 impl From<&models::FileLocations> for domain::FileLocation {
     fn from(it: &models::FileLocations) -> Self {
         domain::FileLocation {
-            purpose: FileLocationPurpose::from(it.purpose),
-            folder: FolderName::from(it.folder),
-            name: FileName::from(it.name),
+            purpose: FileLocationPurpose::from(&it.purpose),
+            folder: FolderName::from(&it.folder),
+            name: FileName::from(&it.name),
         }
     }
 }
@@ -252,11 +287,11 @@ impl domain::FileLocation {
         }
         return buffer;
     }
-    fn new(p: String, f: String, n: String) -> domain::FileLocation {
+    fn new(p: &String, f: &String, n: &String) -> domain::FileLocation {
         FileLocation {
-            purpose: FileLocationPurpose(p),
-            folder: FolderName(f),
-            name: FileName(n),
+            purpose: FileLocationPurpose::from(p),
+            folder: FolderName::from(f),
+            name: FileName::from(n),
         }
     }
 }
@@ -273,14 +308,14 @@ impl IMaybeEmpty for Account {
     }
 }
 
-fn fetch_account(account_id: String, third_party: String) -> Option<ConfigId> {
+fn fetch_account(account_id: &str, third_party: &str) -> Option<ConfigId> {
     use self::diesel::prelude::*;
     let connection = db::connect();
     use db::schema;
     use schema::accounts::dsl::*;
     let results = accounts
-        .filter(thirdParty.eq(third_party))
-        .filter(id.eq(account_id))
+        .filter(thirdParty.eq(&third_party))
+        .filter(id.eq(&account_id))
         .limit(1)
         .load::<models::Accounts>(&connection)
         .expect("Error loading accounts");
@@ -296,8 +331,8 @@ fn fetch_credentials(config_id: &ConfigId) -> Option<domain::Credentials> {
     use db::schema;
     use schema::credentials::dsl::*;
     let results = credentials
-        .filter(thirdParty.eq(config_id.third_party_id.to_string()))
-        .filter(account.eq(config_id.account_id.to_string()))
+        .filter(thirdParty.eq(&config_id.third_party_id.to_string()))
+        .filter(account.eq(&config_id.account_id.to_string()))
         .limit(1)
         .load::<models::Credentials>(&connection)
         .expect("Error loading credentials");
@@ -314,8 +349,8 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
     use db::schema;
     use schema::fileLocation::dsl::*;
     let results = fileLocation
-        .filter(thirdParty.eq(config_id.third_party_id.to_string()))
-        .filter(account.eq(config_id.account_id.to_string()))
+        .filter(thirdParty.eq(&config_id.third_party_id.to_string()))
+        .filter(account.eq(&config_id.account_id.to_string()))
         .load::<models::FileLocations>(&connection)
         .expect("Error loading file locations");
     if results.is_empty() {
@@ -325,8 +360,8 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
     }
 }
 
-pub fn attempt_load_account(id: String, third_party: String) -> Option<Account> {
-    match fetch_account(id, third_party) {
+pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
+    match fetch_account(&id, &third_party) {
         None => None,
         Some(ref config_id) => match fetch_credentials(config_id) {
             None => None,
