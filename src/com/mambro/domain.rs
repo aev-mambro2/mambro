@@ -95,10 +95,6 @@ impl FolderName {
     }
 }
 
-pub type Key = SecStr;
-
-pub type Secret = SecStr;
-
 #[derive(Debug)]
 pub struct ThirdPartyId(pub Vec<u8>);
 impl From<&str> for ThirdPartyId {
@@ -169,7 +165,7 @@ impl IMaybeEmpty for FolderName {
     }
 }
 
-impl IMaybeEmpty for SecStr {
+impl IMaybeEmpty for SecUtf8 {
     fn is_empty(&self) -> bool {
         self.unsecure().len() == 0
     }
@@ -213,8 +209,8 @@ impl ConfigId {
 
 #[derive(Debug)]
 pub struct Token {
-    pub key: Key,
-    pub secret: Secret,
+    pub key: SecUtf8,
+    pub secret: SecUtf8,
 }
 impl IMaybeEmpty for Token {
     fn is_empty(&self) -> bool {
@@ -222,10 +218,10 @@ impl IMaybeEmpty for Token {
     }
 }
 impl Token {
-    fn from(key: &String, secret: &String) -> Self {
+    fn from(k: &String, s: &String) -> Self {
         Token {
-            key: Key::from(key),
-            secret: Secret::from(secret),
+            key: SecUtf8::from(k.into_bytes().clone()),
+            secret:SecUtf8::from(s.into_bytes().clone()),
         }
     }
 }
