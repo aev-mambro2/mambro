@@ -9,17 +9,20 @@ use secstr::*;
 pub struct AccountId(pub Vec<u8>);
 impl From<&str> for AccountId {
     fn from(s: &str) -> Self {
-        AccountId(s.as_bytes().to_vec())
+        AccountId::from(s)
+    }
+}
+impl From<String> for AccountId {
+    fn from(s: String) -> Self {
+        AccountId::from(s.as_str())
     }
 }
 impl AccountId {
-    fn to_string(&self) -> String {
-        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
+    fn from(s: &str) -> AccountId {
+        AccountId(s.as_bytes().to_vec())
     }
-}
-impl From<&String> for AccountId {
-    fn from(s: &String) -> Self {
-        AccountId(s.into_bytes().clone())
+    fn to_string(&self) -> String {
+        self.0.into()
     }
 }
 
@@ -27,15 +30,18 @@ impl From<&String> for AccountId {
 pub struct FileExtension(pub Vec<u8>);
 impl From<&str> for FileExtension {
     fn from(s: &str) -> Self {
-        FileExtension(s.as_bytes().to_vec())
+        FileExtension::from(s)
     }
 }
-impl From<&String> for FileExtension {
-    fn from(s: &String) -> Self {
-        FileExtension(s.into_bytes().clone())
+impl From<String> for FileExtension {
+    fn from(s: String) -> Self {
+        FileExtension::from(s.as_str())
     }
 }
 impl FileExtension {
+    fn from(s: &str) -> FileExtension {
+        FileExtension(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -43,17 +49,20 @@ impl FileExtension {
 
 #[derive(Debug)]
 pub struct FileName(pub Vec<u8>);
-impl From<&str> for FileName{
+impl From<&str> for FileName {
     fn from(s: &str) -> Self {
-        FileName(s.as_bytes().to_vec())
+        FileName::from(s)
     }
 }
-impl From<&String> for FileName {
-    fn from(s: &String) -> Self {
-        FileName(s.into_bytes().clone())
+impl From<String> for FileName {
+    fn from(s: String) -> Self {
+        FileName::from(s.as_str())
     }
 }
 impl FileName {
+    fn from(s: &str) -> FileName {
+        FileName(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -61,17 +70,20 @@ impl FileName {
 
 #[derive(Debug)]
 pub struct FileLocationPurpose(pub Vec<u8>);
-impl From<&str> for FileLocationPurpose{
+impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
-        FileLocationPurpose(s.as_bytes().to_vec())
+        FileLocationPurpose::from(s)
     }
 }
-impl From<&String> for FileLocationPurpose {
-    fn from(s: &String) -> Self {
-        FileLocationPurpose(s.into_bytes().clone())
+impl From<String> for FileLocationPurpose {
+    fn from(s: String) -> Self {
+        FileLocationPurpose::from(s.as_str())
     }
 }
 impl FileLocationPurpose {
+    fn from(s: &str) -> FileLocationPurpose {
+        FileLocationPurpose(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -81,15 +93,18 @@ impl FileLocationPurpose {
 pub struct FolderName(pub Vec<u8>);
 impl From<&str> for FolderName {
     fn from(s: &str) -> Self {
-        FolderName (s.as_bytes().to_vec())
+        FolderName::from(s)
     }
 }
-impl From<&String> for FolderName {
-    fn from(s: &String) -> Self {
-        FolderName(s.into_bytes().clone())
+impl From<String> for FolderName {
+    fn from(s: String) -> Self {
+        FolderName::from(s.as_str())
     }
 }
 impl FolderName {
+    fn from(s: &str) -> FolderName {
+        FolderName(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -99,15 +114,18 @@ impl FolderName {
 pub struct ThirdPartyId(pub Vec<u8>);
 impl From<&str> for ThirdPartyId {
     fn from(s: &str) -> Self {
-        ThirdPartyId(s.as_bytes().to_vec())
+        ThirdPartyId::from(s)
     }
 }
-impl From<&String> for ThirdPartyId {
-    fn from(s: &String) -> Self {
-        ThirdPartyId(s.into_bytes().clone())
+impl From<String> for ThirdPartyId {
+    fn from(s: String) -> Self {
+        ThirdPartyId::from(s.as_str())
     }
 }
 impl ThirdPartyId {
+    fn from(s: &str) -> ThirdPartyId {
+        ThirdPartyId(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -117,15 +135,18 @@ impl ThirdPartyId {
 pub struct URI(pub Vec<u8>);
 impl From<&str> for URI {
     fn from(s: &str) -> Self {
-        URI(s.as_bytes().to_vec())
+        URI::from(s)
     }
 }
-impl From<&String> for URI {
-    fn from(s: &String) -> Self {
-        URI(s.into_bytes().clone())
+impl From<String> for URI {
+    fn from(s: String) -> Self {
+        URI::from(s.as_str())
     }
 }
 impl URI {
+    fn from(s: &str) -> URI {
+        URI(s.as_bytes().to_vec())
+    }
     fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
@@ -196,8 +217,8 @@ impl IMaybeEmpty for ConfigId {
 impl From<&models::Accounts> for ConfigId {
     fn from(acc: &models::Accounts) -> Self {
         ConfigId {
-            account_id: AccountId::from(&acc.id),
-            third_party_id: ThirdPartyId::from(&acc.third_party),
+            account_id: AccountId::from(&acc.id.as_str()),
+            third_party_id: ThirdPartyId::from(&acc.third_party.as_str()),
         }
     }
 }
@@ -218,10 +239,10 @@ impl IMaybeEmpty for Token {
     }
 }
 impl Token {
-    fn from(k: &String, s: &String) -> Self {
+    fn from(k: &str, s: &str) -> Self {
         Token {
-            key: SecUtf8::from(k.into_bytes().clone()),
-            secret:SecUtf8::from(s.into_bytes().clone()),
+            key: SecUtf8::from(k.as_bytes().clone()),
+            secret: SecUtf8::from(s.as_bytes().clone()),
         }
     }
 }
@@ -240,9 +261,9 @@ impl IMaybeEmpty for domain::Credentials {
 impl From<&models::Credentials> for domain::Credentials {
     fn from(creds: &models::Credentials) -> Self {
         domain::Credentials {
-            uri: URI::from(&creds.uri),
-            app: Token::from(&creds.app_key, &creds.app_secret),
-            user: Token::from(&creds.user_key, &creds.user_secret),
+            uri: URI::from(&creds.uri.as_str()),
+            app: Token::from(&creds.app_key.as_str(), &creds.app_secret.as_str()),
+            user: Token::from(&creds.user_key.as_str(), &creds.user_secret.as_str()),
         }
     }
 }
@@ -269,9 +290,9 @@ impl FileLocation {
 impl From<&models::FileLocations> for domain::FileLocation {
     fn from(it: &models::FileLocations) -> Self {
         domain::FileLocation {
-            purpose: FileLocationPurpose::from(&it.purpose),
-            folder: FolderName::from(&it.folder),
-            name: FileName::from(&it.name),
+            purpose: FileLocationPurpose::from(&it.purpose.as_str()),
+            folder: FolderName::from(&it.folder.as_str()),
+            name: FileName::from(&it.name.as_str()),
         }
     }
 }
@@ -285,9 +306,9 @@ impl domain::FileLocation {
     }
     fn new(p: &String, f: &String, n: &String) -> domain::FileLocation {
         FileLocation {
-            purpose: FileLocationPurpose::from(p),
-            folder: FolderName::from(f),
-            name: FileName::from(n),
+            purpose: FileLocationPurpose::from(p.as_str()),
+            folder: FolderName::from(f.as_str()),
+            name: FileName::from(n.as_str()),
         }
     }
 }
