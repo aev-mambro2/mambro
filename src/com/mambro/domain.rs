@@ -5,7 +5,7 @@ use crate::com::mambro::domain;
 use db::models;
 use secstr::*;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct AccountId(pub Vec<u8>);
 impl From<&str> for AccountId {
     fn from(s: &str) -> Self {
@@ -22,11 +22,11 @@ impl AccountId {
         AccountId(s.as_bytes().to_vec())
     }
     fn to_string(&self) -> String {
-        self.0.into()
+        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct FileExtension(pub Vec<u8>);
 impl From<&str> for FileExtension {
     fn from(s: &str) -> Self {
@@ -47,7 +47,7 @@ impl FileExtension {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct FileName(pub Vec<u8>);
 impl From<&str> for FileName {
     fn from(s: &str) -> Self {
@@ -68,7 +68,7 @@ impl FileName {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct FileLocationPurpose(pub Vec<u8>);
 impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
@@ -89,7 +89,7 @@ impl FileLocationPurpose {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct FolderName(pub Vec<u8>);
 impl From<&str> for FolderName {
     fn from(s: &str) -> Self {
@@ -110,7 +110,7 @@ impl FolderName {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct ThirdPartyId(pub Vec<u8>);
 impl From<&str> for ThirdPartyId {
     fn from(s: &str) -> Self {
@@ -131,7 +131,7 @@ impl ThirdPartyId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct URI(pub Vec<u8>);
 impl From<&str> for URI {
     fn from(s: &str) -> Self {
@@ -204,7 +204,7 @@ impl IMaybeEmpty for URI {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct ConfigId {
     pub account_id: AccountId,
     pub third_party_id: ThirdPartyId,
@@ -228,7 +228,7 @@ impl ConfigId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Token {
     pub key: SecUtf8,
     pub secret: SecUtf8,
@@ -247,7 +247,7 @@ impl Token {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Credentials {
     pub uri: URI,
     pub app: Token,
@@ -268,7 +268,7 @@ impl From<&models::Credentials> for domain::Credentials {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
     pub folder: FolderName,
@@ -313,7 +313,7 @@ impl domain::FileLocation {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Account {
     pub config_id: domain::ConfigId,
     pub credentials: domain::Credentials,
@@ -380,12 +380,12 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
     match fetch_account(&id, &third_party) {
         None => None,
-        Some(ref config_id) => match fetch_credentials(config_id) {
+        Some(config_id) => match fetch_credentials(&config_id) {
             None => None,
-            Some(ref creds) => Some(domain::Account {
-                config_id: *config_id,
-                credentials: *creds,
-                locations: fetch_file_locations(config_id),
+            Some(creds) => Some(domain::Account {
+                config_id: config_id.clone(),
+                credentials: creds.clone(),
+                locations: fetch_file_locations(&config_id),
             }),
         },
     }
