@@ -6,7 +6,7 @@ use db::models;
 use secstr::*;
 
 #[derive(Debug,Clone)]
-pub struct AccountId(pub Vec<u8>);
+pub struct AccountId(Vec<u8>);
 impl From<&str> for AccountId {
     fn from(s: &str) -> Self {
         AccountId::from(s)
@@ -21,13 +21,13 @@ impl AccountId {
     fn from(s: &str) -> AccountId {
         AccountId(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct FileExtension(pub Vec<u8>);
+pub struct FileExtension(Vec<u8>);
 impl From<&str> for FileExtension {
     fn from(s: &str) -> Self {
         FileExtension::from(s)
@@ -42,13 +42,13 @@ impl FileExtension {
     fn from(s: &str) -> FileExtension {
         FileExtension(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct FileName(pub Vec<u8>);
+pub struct FileName(Vec<u8>);
 impl From<&str> for FileName {
     fn from(s: &str) -> Self {
         FileName::from(s)
@@ -63,13 +63,13 @@ impl FileName {
     fn from(s: &str) -> FileName {
         FileName(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct FileLocationPurpose(pub Vec<u8>);
+pub struct FileLocationPurpose(Vec<u8>);
 impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
         FileLocationPurpose::from(s)
@@ -84,13 +84,13 @@ impl FileLocationPurpose {
     fn from(s: &str) -> FileLocationPurpose {
         FileLocationPurpose(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct FolderName(pub Vec<u8>);
+pub struct FolderName(Vec<u8>);
 impl From<&str> for FolderName {
     fn from(s: &str) -> Self {
         FolderName::from(s)
@@ -105,13 +105,13 @@ impl FolderName {
     fn from(s: &str) -> FolderName {
         FolderName(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct ThirdPartyId(pub Vec<u8>);
+pub struct ThirdPartyId(Vec<u8>);
 impl From<&str> for ThirdPartyId {
     fn from(s: &str) -> Self {
         ThirdPartyId::from(s)
@@ -126,13 +126,13 @@ impl ThirdPartyId {
     fn from(s: &str) -> ThirdPartyId {
         ThirdPartyId(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
 
 #[derive(Debug,Clone)]
-pub struct URI(pub Vec<u8>);
+pub struct URI(Vec<u8>);
 impl From<&str> for URI {
     fn from(s: &str) -> Self {
         URI::from(s)
@@ -147,10 +147,11 @@ impl URI {
     fn from(s: &str) -> URI {
         URI(s.as_bytes().to_vec())
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
+
 
 pub trait IMaybeEmpty {
     fn is_empty(&self) -> bool;
@@ -188,7 +189,7 @@ impl IMaybeEmpty for FolderName {
 
 impl IMaybeEmpty for SecUtf8 {
     fn is_empty(&self) -> bool {
-        self.unsecure().len() == 0
+        self.unsecure().is_empty()
     }
 }
 
@@ -203,6 +204,7 @@ impl IMaybeEmpty for URI {
         self.0.is_empty()
     }
 }
+
 
 #[derive(Debug,Clone)]
 pub struct ConfigId {
@@ -223,7 +225,7 @@ impl From<&models::Accounts> for ConfigId {
     }
 }
 impl ConfigId {
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         [self.account_id.to_string(), self.third_party_id.to_string()].join("@")
     }
 }
@@ -283,7 +285,7 @@ impl FileLocation {
     fn extension(&self) -> FileExtension {
         FileExtension::from("")
     }
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         [self.folder.to_string(), self.name.to_string()].join("/")
     }
 }
@@ -297,7 +299,7 @@ impl From<&models::FileLocations> for domain::FileLocation {
     }
 }
 impl domain::FileLocation {
-    fn fromAll(them: &Vec<models::FileLocations>) -> Vec<domain::FileLocation> {
+    fn from_all(them: &Vec<models::FileLocations>) -> Vec<domain::FileLocation> {
         let mut buffer: Vec<domain::FileLocation> = Vec::with_capacity(them.len());
         for x in 0..them.len() {
             buffer.push(domain::FileLocation::from(&them[x]));
@@ -373,7 +375,7 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
     if results.is_empty() {
         return vec![];
     } else {
-        return domain::FileLocation::fromAll(&results);
+        return domain::FileLocation::from_all(&results);
     }
 }
 
