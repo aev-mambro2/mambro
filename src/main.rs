@@ -25,7 +25,7 @@ fn main() {
         }
     } else {
         println!(
-            "Usage: {:?} account thirdparty\nin which blah blah",
+            "Usage: {:?} account thirdparty\nin which account should be the identifier of a record in the configurations data store, \nand thirdparty should be the identifier of that record's third party. \nTogether they form a unique identification we like to call a ConfigId.",
             app_name
         );
     }
