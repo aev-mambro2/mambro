@@ -17,16 +17,22 @@ fn main() {
         let account_id = &args[1].as_str();
         let third_party_id = &args[2].as_str();
         println!("Running for {:?}@{:?}.", account_id, third_party_id);
-    match domain::attempt_load_account(account_id, third_party_id) {
-        None => {}
-        Some(ref account) => {
-            println!("Account: {:?}", account.config_id.to_string());
+        match domain::attempt_load_account(account_id, third_party_id) {
+            None => {}
+            Some(ref account) => {
+                println!("Account: {:?}", account.config_id.to_string());
+            }
         }
-    }
-        println!("Usage: {:?} account thirdparty\nin which blah blah", app_name);
+    } else {
+        println!(
+            "Usage: {:?} account thirdparty\nin which blah blah",
+            app_name
+        );
     }
     let end = SystemTime::now();
     let duration = end.duration_since(start).expect("Time went backwards?");
-    println!("App ran for {:#?}, from {:#?} to {:#?}.", duration, start, end);
+    println!(
+        "App ran for {:#?}, from {:#?} to {:#?}.",
+        duration, start, end
+    );
 }
-
