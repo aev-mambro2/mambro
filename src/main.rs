@@ -31,9 +31,11 @@ fn main() {
         let third_party_id = &args[2].as_str();
         println!("Running for {:?}@{:?}.", account_id, third_party_id);
         match domain::attempt_load_account(account_id, third_party_id) {
-            None => {}
+            None => {
+                println!("No account found for id {:?} at third party {:?}.", account_id, third_party_id);
+            }
             Some(ref account) => {
-                println!("Account: {:?}", account.config_id.to_string());
+                println!("Account: {:?}.", account.config_id.to_string());
             }
         }
     } else {

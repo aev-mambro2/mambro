@@ -364,8 +364,8 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
     use self::diesel::prelude::*;
     let connection = db::connect();
     use db::schema;
-    use schema::fileLocation::dsl::*;
-    let results = fileLocation
+    use schema::fileLocations::dsl::*;
+    let results = fileLocations
         .filter(thirdParty.eq(&config_id.third_party_id.to_string()))
         .filter(account.eq(&config_id.account_id.to_string()))
         .load::<models::FileLocations>(&connection)
