@@ -35,7 +35,7 @@ fn main() {
                 println!("No account found for id {:?} at third party {:?}.", account_id, third_party_id);
             }
             Some(ref account) => {
-                println!("Account: {:?}.", account.config_id.to_string());
+                println!("Account found: {:?}.", account.config_id.to_string());
             }
         }
     } else {
