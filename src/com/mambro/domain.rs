@@ -5,7 +5,7 @@ use crate::com::mambro::domain;
 use db::models;
 use secstr::*;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AccountId(Vec<u8>);
 impl From<&str> for AccountId {
     fn from(s: &str) -> Self {
@@ -26,7 +26,7 @@ impl AccountId {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FileExtension(Vec<u8>);
 impl From<&str> for FileExtension {
     fn from(s: &str) -> Self {
@@ -47,7 +47,7 @@ impl FileExtension {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FileName(Vec<u8>);
 impl From<&str> for FileName {
     fn from(s: &str) -> Self {
@@ -68,7 +68,7 @@ impl FileName {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
 impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
@@ -89,7 +89,7 @@ impl FileLocationPurpose {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FolderName(Vec<u8>);
 impl From<&str> for FolderName {
     fn from(s: &str) -> Self {
@@ -110,7 +110,7 @@ impl FolderName {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ThirdPartyId(Vec<u8>);
 impl From<&str> for ThirdPartyId {
     fn from(s: &str) -> Self {
@@ -131,7 +131,7 @@ impl ThirdPartyId {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct URI(Vec<u8>);
 impl From<&str> for URI {
     fn from(s: &str) -> Self {
@@ -204,7 +204,7 @@ impl IMaybeEmpty for URI {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ConfigId {
     pub account_id: AccountId,
     pub third_party_id: ThirdPartyId,
@@ -228,7 +228,7 @@ impl ConfigId {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Token {
     pub key: SecUtf8,
     pub secret: SecUtf8,
@@ -247,7 +247,7 @@ impl Token {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Credentials {
     pub uri: URI,
     pub app: Token,
@@ -268,7 +268,7 @@ impl From<&models::Credentials> for domain::Credentials {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
     pub folder: FolderName,
@@ -280,7 +280,7 @@ impl IMaybeEmpty for FileLocation {
     }
 }
 impl FileLocation {
-    fn extension(&self) -> FileExtension {
+    pub fn extension(&self) -> FileExtension {
         FileExtension::from("")
     }
     pub fn to_string(&self) -> String {
@@ -304,7 +304,7 @@ impl domain::FileLocation {
         }
         return buffer;
     }
-    fn new(p: &String, f: &String, n: &String) -> domain::FileLocation {
+    pub fn new(p: &String, f: &String, n: &String) -> domain::FileLocation {
         FileLocation {
             purpose: FileLocationPurpose::from(p.as_str()),
             folder: FolderName::from(f.as_str()),
@@ -313,7 +313,7 @@ impl domain::FileLocation {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Account {
     pub config_id: domain::ConfigId,
     pub credentials: domain::Credentials,
