@@ -32,10 +32,14 @@ fn main() {
         println!("Running for {:?}@{:?}.", account_id, third_party_id);
         match domain::attempt_load_account(account_id, third_party_id) {
             None => {
-                println!("No account found for id {:?} at third party {:?}.", account_id, third_party_id);
+                println!(
+                    "No account found for id {:?} at third party {:?}.",
+                    account_id, third_party_id
+                );
             }
             Some(ref account) => {
                 println!("Account found: {:?}.", account.config_id.to_string());
+                println!("File locations: {:#?}.", account.locations);
             }
         }
     } else {
