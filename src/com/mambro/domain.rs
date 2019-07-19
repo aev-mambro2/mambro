@@ -241,8 +241,8 @@ impl IMaybeEmpty for Token {
 impl Token {
     fn from(k: &str, s: &str) -> Self {
         Token {
-            key: SecUtf8::from(k.as_bytes().clone()),
-            secret: SecUtf8::from(s.as_bytes().clone()),
+            key: SecUtf8::from(k.as_bytes()),
+            secret: SecUtf8::from(s.as_bytes()),
         }
     }
 }
@@ -279,14 +279,6 @@ impl IMaybeEmpty for FileLocation {
         self.folder.is_empty() && self.name.is_empty()
     }
 }
-impl FileLocation {
-    pub fn extension(&self) -> FileExtension {
-        FileExtension::from("")
-    }
-    pub fn to_string(&self) -> String {
-        [self.folder.to_string(), self.name.to_string()].join("/")
-    }
-}
 impl From<&models::FileLocations> for domain::FileLocation {
     fn from(it: &models::FileLocations) -> Self {
         domain::FileLocation {
@@ -297,19 +289,25 @@ impl From<&models::FileLocations> for domain::FileLocation {
     }
 }
 impl domain::FileLocation {
+    pub fn extension(&self) -> FileExtension {
+        FileExtension::from("")
+    }
     fn from_all(them: &Vec<models::FileLocations>) -> Vec<domain::FileLocation> {
         let mut buffer: Vec<domain::FileLocation> = Vec::with_capacity(them.len());
-        for x in 0..them.len() {
-            buffer.push(domain::FileLocation::from(&them[x]));
+        for item in them {
+            buffer.push(domain::FileLocation::from(item));
         }
-        return buffer;
+        buffer
     }
-    pub fn new(p: &String, f: &String, n: &String) -> domain::FileLocation {
+    pub fn new(p: &str, f: &str, n: &str) -> domain::FileLocation {
         FileLocation {
-            purpose: FileLocationPurpose::from(p.as_str()),
-            folder: FolderName::from(f.as_str()),
-            name: FileName::from(n.as_str()),
+            purpose: FileLocationPurpose::from(p),
+            folder: FolderName::from(f),
+            name: FileName::from(n),
         }
+    }
+    pub fn to_string(&self) -> String {
+        [self.folder.to_string(), self.name.to_string()].join("/")
     }
 }
 
@@ -354,9 +352,9 @@ fn fetch_credentials(config_id: &ConfigId) -> Option<domain::Credentials> {
         .load::<models::Credentials>(&connection)
         .expect("Error loading credentials");
     if results.is_empty() {
-        return None;
+        None
     } else {
-        return Some(domain::Credentials::from(&results[0]));
+        Some(domain::Credentials::from(&results[0]))
     }
 }
 
@@ -371,9 +369,9 @@ fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
         .load::<models::FileLocations>(&connection)
         .expect("Error loading file locations");
     if results.is_empty() {
-        return vec![];
+        vec![]
     } else {
-        return domain::FileLocation::from_all(&results);
+        domain::FileLocation::from_all(&results)
     }
 }
 
