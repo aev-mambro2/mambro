@@ -1,8 +1,8 @@
 extern crate diesel;
 extern crate secstr;
-use crate::com::mambro::db;
-use crate::com::mambro::domain;
-use db::models;
+use crate::com::mambro::db as db;
+use crate::com::mambro::domain as domain;
+use db::models as models;
 use secstr::*;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -292,12 +292,13 @@ impl domain::FileLocation {
     pub fn extension(&self) -> FileExtension {
         FileExtension::from("")
     }
-    fn from_all(them: &Vec<models::FileLocations>) -> Vec<domain::FileLocation> {
+    fn from_all(them: &[models::FileLocations]) -> Vec<domain::FileLocation> {
         let mut buffer: Vec<domain::FileLocation> = Vec::with_capacity(them.len());
         for item in them {
             buffer.push(domain::FileLocation::from(item));
         }
-        buffer
+        buffer.dedup();
+	buffer
     }
     pub fn new(p: &str, f: &str, n: &str) -> domain::FileLocation {
         FileLocation {
