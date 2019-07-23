@@ -38,9 +38,12 @@ fn main() {
                 );
             }
             Some(ref account) => {
-                println!("File locations for account {:?}:", account.config_id.to_string());
+                println!(
+                    "File locations for account {:?}:",
+                    account.config_id.to_string()
+                );
                 for loc in account.locations.iter() {
-                  println!("- {:?}", loc.to_path());
+                    println!("- {:?}", loc.to_path());
                 }
             }
         }

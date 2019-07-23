@@ -1,11 +1,11 @@
 extern crate diesel;
 extern crate secstr;
-use crate::com::mambro::db as db;
-use crate::com::mambro::domain as domain;
-use db::models as models;
+use crate::com::mambro::db;
+use crate::com::mambro::domain;
+use db::models;
 use secstr::*;
-use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountId(Vec<u8>);
@@ -109,13 +109,7 @@ impl IMaybeEmpty for FileLocationPurpose {
 
 impl IMaybeEmpty for PathBuf {
     fn is_empty(&self) -> bool {
-        self.as_path().is_empty()
-    }
-}
-
-impl IMaybeEmpty for Path {
-    fn is_empty(&self) -> bool {
-        self.is_empty()
+        self.as_os_str().is_empty()
     }
 }
 
@@ -213,11 +207,9 @@ impl IMaybeEmpty for FileLocation {
 }
 impl From<&models::FileLocations> for domain::FileLocation {
     fn from(it: &models::FileLocations) -> Self {
-        let mut x = PathBuf::from(&it.folder.as_str());
-        x.push(&it.name.as_str());
         domain::FileLocation {
             purpose: FileLocationPurpose::from(&it.purpose.as_str()),
-            path: x,
+            path: Path::new(&it.folder).join(&it.name),
         }
     }
 }
@@ -231,14 +223,12 @@ impl domain::FileLocation {
             buffer.push(domain::FileLocation::from(item));
         }
         buffer.dedup();
-	buffer
+        buffer
     }
     pub fn new(p: &str, f: &str, n: &str) -> domain::FileLocation {
-        let mut x = PathBuf::from(f);
-        x.push(n);
         FileLocation {
             purpose: FileLocationPurpose::from(p),
-            path: x,
+            path: Path::new(f).join(n),
         }
     }
     pub fn to_path(&self) -> &Path {
