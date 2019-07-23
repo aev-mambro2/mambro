@@ -4,6 +4,8 @@ use crate::com::mambro::db as db;
 use crate::com::mambro::domain as domain;
 use db::models as models;
 use secstr::*;
+use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountId(Vec<u8>);
@@ -27,48 +29,6 @@ impl AccountId {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct FileExtension(Vec<u8>);
-impl From<&str> for FileExtension {
-    fn from(s: &str) -> Self {
-        FileExtension::from(s)
-    }
-}
-impl From<String> for FileExtension {
-    fn from(s: String) -> Self {
-        FileExtension::from(s.as_str())
-    }
-}
-impl FileExtension {
-    fn from(s: &str) -> FileExtension {
-        FileExtension(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
-        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct FileName(Vec<u8>);
-impl From<&str> for FileName {
-    fn from(s: &str) -> Self {
-        FileName::from(s)
-    }
-}
-impl From<String> for FileName {
-    fn from(s: String) -> Self {
-        FileName::from(s.as_str())
-    }
-}
-impl FileName {
-    fn from(s: &str) -> FileName {
-        FileName(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
-        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
 impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
@@ -83,27 +43,6 @@ impl From<String> for FileLocationPurpose {
 impl FileLocationPurpose {
     fn from(s: &str) -> FileLocationPurpose {
         FileLocationPurpose(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
-        String::from_utf8(self.0.as_slice().to_vec()).unwrap()
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct FolderName(Vec<u8>);
-impl From<&str> for FolderName {
-    fn from(s: &str) -> Self {
-        FolderName::from(s)
-    }
-}
-impl From<String> for FolderName {
-    fn from(s: String) -> Self {
-        FolderName::from(s.as_str())
-    }
-}
-impl FolderName {
-    fn from(s: &str) -> FolderName {
-        FolderName(s.as_bytes().to_vec())
     }
     pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
@@ -162,27 +101,21 @@ impl IMaybeEmpty for AccountId {
     }
 }
 
-impl IMaybeEmpty for FileName {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
-impl IMaybeEmpty for FileExtension {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
 impl IMaybeEmpty for FileLocationPurpose {
     fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 }
 
-impl IMaybeEmpty for FolderName {
+impl IMaybeEmpty for PathBuf {
     fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.as_path().is_empty()
+    }
+}
+
+impl IMaybeEmpty for Path {
+    fn is_empty(&self) -> bool {
+        self.is_empty()
     }
 }
 
@@ -271,26 +204,26 @@ impl From<&models::Credentials> for domain::Credentials {
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
-    pub folder: FolderName,
-    pub name: FileName,
+    pub path: PathBuf,
 }
 impl IMaybeEmpty for FileLocation {
     fn is_empty(&self) -> bool {
-        self.folder.is_empty() && self.name.is_empty()
+        self.path.is_empty()
     }
 }
 impl From<&models::FileLocations> for domain::FileLocation {
     fn from(it: &models::FileLocations) -> Self {
+        let mut x = PathBuf::from(&it.folder.as_str());
+        x.push(&it.name.as_str());
         domain::FileLocation {
             purpose: FileLocationPurpose::from(&it.purpose.as_str()),
-            folder: FolderName::from(&it.folder.as_str()),
-            name: FileName::from(&it.name.as_str()),
+            path: x,
         }
     }
 }
 impl domain::FileLocation {
-    pub fn extension(&self) -> FileExtension {
-        FileExtension::from("")
+    pub fn extension(&self) -> Option<&OsStr> {
+        self.path.extension()
     }
     fn from_all(them: &[models::FileLocations]) -> Vec<domain::FileLocation> {
         let mut buffer: Vec<domain::FileLocation> = Vec::with_capacity(them.len());
@@ -301,14 +234,15 @@ impl domain::FileLocation {
 	buffer
     }
     pub fn new(p: &str, f: &str, n: &str) -> domain::FileLocation {
+        let mut x = PathBuf::from(f);
+        x.push(n);
         FileLocation {
             purpose: FileLocationPurpose::from(p),
-            folder: FolderName::from(f),
-            name: FileName::from(n),
+            path: x,
         }
     }
-    pub fn to_string(&self) -> String {
-        [self.folder.to_string(), self.name.to_string()].join("/")
+    pub fn to_path(&self) -> &Path {
+        self.path.as_path()
     }
 }
 
