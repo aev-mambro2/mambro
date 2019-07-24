@@ -5,6 +5,7 @@ use crate::com::mambro::domain;
 use db::models;
 use secstr::*;
 use std::ffi::OsStr;
+use std::fmt;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -34,6 +35,11 @@ impl PartialEq<&str> for FileLocationPurpose {
     fn eq(&self, s: &&str) -> bool {
         let other = FileLocationPurpose::from(*s);
         self.eq(&other)
+    }
+}
+impl fmt::Display for FileLocationPurpose {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.to_string(), f)
     }
 }
 impl From<&str> for FileLocationPurpose {

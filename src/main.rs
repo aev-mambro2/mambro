@@ -33,32 +33,36 @@ fn main() {
         println!("Running for {:?}@{:?}.", account_id, third_party_id);
         match domain::attempt_load_account(account_id, third_party_id) {
             None => println!(
-                    "No account found for id {:?} at third party {:?}.",
-                    account_id, third_party_id
-                ),
+                "No account found for id {:?} at third party {:?}.",
+                account_id, third_party_id
+            ),
             Some(ref account) => {
                 println!(
                     "File locations for account {:?}:",
                     account.config_id.to_string()
                 );
                 let mut iter = account.locations.iter();
-                loop {
-                    match iter.next() {
-                        Some(loc) => println!("- {:?}: {:?}", loc.purpose, loc.to_path()),
-                        None => break,
-                    }
+                while let Some(loc) = iter.next() {
+                    println!("- {:?}: {:?}", loc.purpose, loc.to_path())
                 }
-//               match  account.locations.iter().find(|&it| &it.purpose.eq("inventoryLevels")) {
-//                    None => println!(
-//                            "No location for purpose inventoryLevels for account {:?}.",
-//                            account.config_id.to_string()
-//                        ),
-//                    Some(ref there) => println!(
-//                            "Location for purpose inventoryLevels for account {:?}: {:?}.",
-//                            account.config_id.to_string(),
-//                            there.to_path()
-//                        ),
-//               }
+                let o = "orders";
+                match account
+                    .locations
+                    .iter()
+                    .find(|&it| it.purpose.eq(&o))
+                {
+                    None => println!(
+                        "No location for purpose {} for account {:?}.",
+                        o,
+                        account.config_id.to_string()
+                    ),
+                    Some(ref there) => println!(
+                        "Location for purpose {} for account {:?}: {:?}.",
+                        o,
+                        account.config_id.to_string(),
+                        there.to_path()
+                    ),
+                }
             }
         }
     } else {
