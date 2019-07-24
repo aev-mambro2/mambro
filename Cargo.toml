@@ -1,8 +1,10 @@
 [package]
 name = "mambro"
 version = "0.1.0"
-authors = ["dave"]
+authors = ["A.E.Veltstra"]
 edition = "2018"
+repository = "https://github.com/aev-mambro2/mambro"
+description = "Domain-specific ORM. Sets up and accesses a data store for integrating a file storage with remote web APIs."
 
 [dependencies]
 component = "0.1.0"

@@ -30,6 +30,12 @@ impl AccountId {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
+impl PartialEq<&str> for FileLocationPurpose {
+    fn eq(&self, s: &&str) -> bool {
+        let other = FileLocationPurpose::from(*s);
+        self.eq(&other)
+    }
+}
 impl From<&str> for FileLocationPurpose {
     fn from(s: &str) -> Self {
         FileLocationPurpose::from(s)

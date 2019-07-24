@@ -20,6 +20,7 @@ mod com;
 use crate::com::mambro::domain;
 use std::env;
 use std::time::SystemTime;
+//use glob::glob;
 
 fn main() {
     let start = SystemTime::now();
@@ -31,20 +32,33 @@ fn main() {
         let third_party_id = &args[2].as_str();
         println!("Running for {:?}@{:?}.", account_id, third_party_id);
         match domain::attempt_load_account(account_id, third_party_id) {
-            None => {
-                println!(
+            None => println!(
                     "No account found for id {:?} at third party {:?}.",
                     account_id, third_party_id
-                );
-            }
+                ),
             Some(ref account) => {
                 println!(
                     "File locations for account {:?}:",
                     account.config_id.to_string()
                 );
-                for loc in account.locations.iter() {
-                    println!("- {:?}", loc.to_path());
+                let mut iter = account.locations.iter();
+                loop {
+                    match iter.next() {
+                        Some(loc) => println!("- {:?}: {:?}", loc.purpose, loc.to_path()),
+                        None => break,
+                    }
                 }
+//               match  account.locations.iter().find(|&it| &it.purpose.eq("inventoryLevels")) {
+//                    None => println!(
+//                            "No location for purpose inventoryLevels for account {:?}.",
+//                            account.config_id.to_string()
+//                        ),
+//                    Some(ref there) => println!(
+//                            "Location for purpose inventoryLevels for account {:?}: {:?}.",
+//                            account.config_id.to_string(),
+//                            there.to_path()
+//                        ),
+//               }
             }
         }
     } else {
