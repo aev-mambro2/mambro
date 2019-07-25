@@ -1,13 +1,57 @@
+/// Domain contains data types that are
+/// used in data integration applications
+/// that connect local ERPs to remote 
+/// channels, a.k.a. third parties.
+///
+/// Those often require account inform-
+/// ation and credentials for authoriz-
+/// ing communications. 
+///
+/// Each account tends to read the info
+/// it needs to send from file locations
+/// that are marked for a particular
+/// communication purpose.
+///
+/// When communications have completed,
+/// users and managers expect some notific-
+/// ation. Thus, each account owns a list
+/// of email addresses, each of which is 
+/// marked for a purpose, and sometimes 
+/// exclusive to an application.
+
+/// Diesel accesses data stores.
 extern crate diesel;
+/// SecStr destroys sensitive data from
+/// memory once done.
 extern crate secstr;
+/// Mambro db knows the layout of the 
+/// data store.
 use crate::com::mambro::db;
+/// Hey, look, that's me!
 use crate::com::mambro::domain;
+/// Db models contain rust-based data 
+/// wrappers around the data store's 
+/// structures.
 use db::models;
 use secstr::*;
+/// OsStr is used for O.S.-specific texts
+/// (like file paths and names), that can
+/// contain characters which don't fit into
+/// utf-8.
 use std::ffi::OsStr;
+/// Fmt helps us share human-readable views 
+/// on the data retained by the data types 
+/// in this module.
 use std::fmt;
+/// Path and PathBuf handle file locations.
 use std::path::{Path, PathBuf};
 
+/// Identifies an account. Gets combined 
+/// with ThirdPartyId in ConfigId, which
+/// must be unique.
+///
+/// Assets like email addresses and file
+/// locations get assigned to ConfigIds.
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountId(Vec<u8>);
 impl From<&str> for AccountId {
@@ -29,6 +73,9 @@ impl AccountId {
     }
 }
 
+/// The intended use of a file location. 
+/// Gets combined with a folder path
+/// and file name in a FileLocation.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
 impl PartialEq<&str> for FileLocationPurpose {
@@ -37,6 +84,8 @@ impl PartialEq<&str> for FileLocationPurpose {
         self.eq(&other)
     }
 }
+/// To make the purpose display as a word,
+/// rather than a byte array. Failed.
 impl fmt::Display for FileLocationPurpose {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.to_string(), f)
@@ -61,6 +110,12 @@ impl FileLocationPurpose {
     }
 }
 
+/// Identifies a remote party. Gets combined
+/// with an AccountId in a ConfigId, which
+/// must be unique.
+///
+/// Assets like file locations and email 
+/// addresses get assigned to ConfigIds.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ThirdPartyId(Vec<u8>);
 impl From<&str> for ThirdPartyId {
@@ -82,6 +137,13 @@ impl ThirdPartyId {
     }
 }
 
+/// The address via which communication 
+/// should happen for an account at a 
+/// third party. Gets combined with 
+/// authentication tokens in Credentials.
+///
+/// This may be replaced with a standard 
+/// data type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct URI(Vec<u8>);
 impl From<&str> for URI {
@@ -103,7 +165,10 @@ impl URI {
     }
 }
 
+/// Indicates that a data type instance 
+/// may contain no data at all.
 pub trait IMaybeEmpty {
+    /// Whether the instance contains anything.
     fn is_empty(&self) -> bool;
 }
 
@@ -142,6 +207,7 @@ impl IMaybeEmpty for URI {
         self.0.is_empty()
     }
 }
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConfigId {
