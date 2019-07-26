@@ -208,7 +208,10 @@ impl IMaybeEmpty for URI {
     }
 }
 
-
+/// A unique combination of AccountId and 
+/// ThirdPartyId. Owns assets like email
+/// addresses, file locations, credentials,
+/// and communication addresses.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConfigId {
     pub account_id: AccountId,
@@ -233,6 +236,12 @@ impl ConfigId {
     }
 }
 
+/// Combines a key and a secret used for
+/// authentication. Both are destroyed from 
+/// memory after use.
+///
+/// In all cases encountered, 2 tokens and 
+/// a URI suffice to make a Credential.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token {
     pub key: SecUtf8,
@@ -252,6 +261,9 @@ impl Token {
     }
 }
 
+/// All that is needed to authenticate against
+/// a communication address. An account tends
+/// to have exactly 1 instance of Credentials.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Credentials {
     pub uri: URI,
@@ -273,6 +285,15 @@ impl From<&models::Credentials> for domain::Credentials {
     }
 }
 
+/// Determines where files can be located
+/// and how they are named, what purpose 
+/// they serve, and whether they are used 
+/// for reading, writing, or both.
+///
+/// An account tends to own multiple file
+/// locations for multiple purposes. An 
+/// application tends to be built for a 
+/// single such purpose.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
@@ -314,6 +335,9 @@ impl domain::FileLocation {
     }
 }
 
+/// Combines the ConfigId, Credentials, 
+/// FileLocations, and EmailAddresses 
+/// owned by a single account.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Account {
     pub config_id: domain::ConfigId,
@@ -326,6 +350,11 @@ impl IMaybeEmpty for Account {
     }
 }
 
+/// Attempts to fetch that ConfigId from the 
+/// data store which matches the passed-in 
+/// account id and third party id.
+///
+/// If not found, returns None.
 fn fetch_account(account_id: &str, third_party: &str) -> Option<ConfigId> {
     use self::diesel::prelude::*;
     let connection = db::connect();
@@ -343,6 +372,11 @@ fn fetch_account(account_id: &str, third_party: &str) -> Option<ConfigId> {
     return Some(ConfigId::from(&results[0]));
 }
 
+/// Attempts to load from the data store those
+/// Credentials that belong to the passed-in
+/// ConfigId.
+///
+/// If not found, returns None.
 fn fetch_credentials(config_id: &ConfigId) -> Option<domain::Credentials> {
     use self::diesel::prelude::*;
     let connection = db::connect();
@@ -361,6 +395,11 @@ fn fetch_credentials(config_id: &ConfigId) -> Option<domain::Credentials> {
     }
 }
 
+/// Attempts to load from the data store those
+/// file locations that belong to the passed-in
+/// ConfigId.
+/// 
+/// If not found, returns None.
 fn fetch_file_locations(config_id: &ConfigId) -> Vec<domain::FileLocation> {
     use self::diesel::prelude::*;
     let connection = db::connect();
