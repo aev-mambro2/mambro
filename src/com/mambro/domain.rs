@@ -1,23 +1,23 @@
-/// Domain contains data types that are
-/// used in data integration applications
-/// that connect local ERPs to remote 
-/// channels, a.k.a. third parties.
-///
-/// Those often require account inform-
-/// ation and credentials for authoriz-
-/// ing communications. 
-///
-/// Each account tends to read the info
-/// it needs to send from file locations
-/// that are marked for a particular
-/// communication purpose.
-///
-/// When communications have completed,
-/// users and managers expect some notific-
-/// ation. Thus, each account owns a list
-/// of email addresses, each of which is 
-/// marked for a purpose, and sometimes 
-/// exclusive to an application.
+///! Domain contains data types that are
+///! used in data integration applications
+///! that connect local ERPs to remote 
+///! channels, a.k.a. third parties.
+///!
+///! Those often require account inform-
+///! ation and credentials for authoriz-
+///! ing communications. 
+///!
+///! Each account tends to read the info
+///! it needs to send from file locations
+///! that are marked for a particular
+///! communication purpose.
+///!
+///! When communications have completed,
+///! users and managers expect some notific-
+///! ation. Thus, each account owns a list
+///! of email addresses, each of which is 
+///! marked for a purpose, and sometimes 
+///! exclusive to an application.
 
 /// Diesel accesses data stores.
 extern crate diesel;

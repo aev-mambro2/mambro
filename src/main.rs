@@ -1,10 +1,31 @@
+// For compiling and debugging diesel,
+// we are required to increase the 
+// recursion limit.
 #![recursion_limit = "128"]
+
+// Diesel requires the use of macros.
 #[macro_use]
+
+// Diesel handles our data store.
 extern crate diesel;
+
+// DotEnv handles a local configuration file.
 extern crate dotenv;
 
+///! Downloads new orders from Joor for 
+///! accounts like Habitual Denim.
+///! For installation instructions, refer to
+///! installing.md.
+///! 
+///! Author: A.E. Veltstra
+///! Since: 2.19.501.900
+///! Version: 2.19.726.1804
+
+/// Unit tests for this module.
 #[cfg(test)]
 mod tests {
+    // The domain crate must let us create 
+    // a file location instance.
     #[test]
     fn can_create_file_location() {
         use crate::com::mambro::domain;
@@ -12,6 +33,7 @@ mod tests {
         let f = "/usr/dave/orders";
         let n = "order-{id}-dd-{dt}.xml";
         let fl = domain::FileLocation::new(p, f, n);
+        // We can't compare name against &str (yet).
         assert_eq!(fl.name.to_string(), n.to_string());
     }
 }
@@ -22,6 +44,22 @@ use std::env;
 use std::time::SystemTime;
 //use glob::glob;
 
+/// Execution entry point.
+/// Resolves command-line arguments,
+/// fetches a matching account, and 
+/// downloads its orders. Orders 
+/// get saved in the location set in
+/// the data store for the account.
+/// Warnings and errors get logged.
+///
+/// # Example run invocation: 
+/// ```
+/// > com/mambro/joor/download/orders --account HaCoSandbox
+/// ```
+/// 
+/// # Panics
+/// If we failed to connect to the data store.
+///
 fn main() {
     let start = SystemTime::now();
     let args: Vec<String> = env::args().collect();
