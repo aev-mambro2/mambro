@@ -1,1 +1,0 @@
-{"rustc":9640904606010039263,"features":"","target":0,"profile":0,"path":0,"deps":[["libsqlite3-sys v0.12.0","build_script_build",17916058479180519004]],"local":[{"EnvBased":["SQLITE3_INCLUDE_DIR",null]},{"EnvBased":["SQLITE3_LIB_DIR",null]},{"EnvBased":["SQLITE3_STATIC",null]}],"rustflags":[],"metadata":0}
