@@ -1,0 +1,11 @@
+[package]
+name = "orders"
+version = "0.1.0"
+authors = ["A.E.Veltstra"]
+edition = "2018"
+description = "Downloads and saves orders from Joor for our accounts." 
+
+[dependencies]
+domain = { version = "0.1.0", path = "../../../lib/domain" }
+diesel = { version = "1.4.0", features = ["sqlite"] }
+

@@ -1,0 +1,16 @@
+[package]
+name = "domain"
+version = "0.1.0"
+authors = ["A.E.Veltstra"]
+edition = "2018"
+repository = "https://github.com/aev-mambro2/mambro"
+description = "Domain-specific ORM. Sets up and accesses a data store for integrating a file storage with remote web APIs."
+
+[dependencies]
+diesel = { version = "1.4.0", features = ["sqlite"] }
+secstr = "0.3.2"
+
+db     = { version = "0.1.0", path = "../db" }
+models = { version = "0.1.0", path = "../models" }
+schema = { version = "0.1.0", path = "../schema" }
+

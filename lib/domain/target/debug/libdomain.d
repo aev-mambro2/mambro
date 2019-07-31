@@ -1,0 +1,1 @@
+/home/dave/dev/mambro/lib/domain/target/debug/libdomain.rlib: /home/dave/dev/mambro/lib/db/src/lib.rs /home/dave/dev/mambro/lib/domain/src/lib.rs /home/dave/dev/mambro/lib/models/src/lib.rs /home/dave/dev/mambro/lib/schema/src/lib.rs
