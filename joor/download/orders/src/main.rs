@@ -179,7 +179,7 @@ fn main() {
             );
             let mut iter = account.locations.iter();
             while let Some(loc) = iter.next() {
-                println!("- {:?}: {:?}", loc.purpose, loc.to_path())
+                println!("- {}: {}", loc.purpose, loc.to_path().display())
             }
             let o = "orders";
             match account.locations.iter().find(|&it| it.purpose.eq(&o)) {
