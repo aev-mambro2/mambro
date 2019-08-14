@@ -5,7 +5,7 @@
 //
 // Author: A.E. Veltstra
 // Since: 2.19.501.900
-// Version: 2.19.801.1236
+// Version: 2.19.814.622
 
 // For compiling and debugging diesel,
 // we are required to increase the
@@ -92,15 +92,15 @@ use std::time::SystemTime;
 // ```
 fn find_account_id(args: &Vec<String>) -> Option<&str> {
     let mut i = args.len() - 1;
-while 1 < i {
-    i = i - 1;
-    let y: &str = &*args[i];
-    if y.eq("--account") {
-        let x = i + 1;
-        return Some(&*args[x]);
+    while 1 < i {
+        i = i - 1;
+        let y: &str = &*args[i];
+        if y.eq("--account") {
+            let x = i + 1;
+            return Some(&*args[x]);
+        }
     }
-}
-None
+    None
 }
 
 // Rummages through the input to locate and
@@ -152,27 +152,25 @@ fn find_third_party_id(args: &Vec<String>) -> Option<&str> {
 //
 fn main() {
     let start = SystemTime::now();
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<_> = env::args().collect();
     let maybe_account_id = find_account_id(&args);
-    let maybe_third_party_id = find_third_party_id(&args);
-    let mut account_id = "";
     if maybe_account_id.is_none() {
         println!("Missing CL parameter `--account` followed by an account identifier.");
+        println!("CL parameters are case sensitive: --Account differs from --account.");
     } else {
-        account_id = maybe_account_id.unwrap_or_default();
-    }
-    let mut third_party_id = "";
-    if maybe_third_party_id.is_none() {
-        println!("Missing CL parameter `--thirparty` followed by a third party name.");
-    } else {
-        third_party_id = maybe_third_party_id.unwrap_or_default();
-    }
-    match domain::attempt_load_account(account_id, third_party_id) {
-        None => println!(
-            "No account found for id {:?} at third party {:?}.",
-            account_id, third_party_id
-        ),
-        Some(ref account) => {
+        let maybe_third_party_id = find_third_party_id(&args);
+        if maybe_third_party_id.is_none() {
+            println!("Missing CL parameter `--thirdparty` followed by a third party name.");
+            println!("Mind your capitalization: --ThirdParty differs from --thirdparty.");
+        } else {
+            let third_party_id: &str = maybe_third_party_id.unwrap_or_default();
+            let account_id: &str = maybe_account_id.unwrap_or_default();
+            match domain::attempt_load_account(account_id, third_party_id) {
+            None => println!(
+                "No account found for id {:?} at third party {:?}. Thought it should exist? Check your capitals: lower and upper casing matters.",
+                account_id, third_party_id
+            ),
+            Some(ref account) => {
             println!(
                 "File locations for account {:?}:",
                 account.config_id.to_string()
@@ -195,6 +193,8 @@ fn main() {
                     there.to_path()
                 ),
             }
+        }
+    }
         }
     }
     let end = SystemTime::now();
