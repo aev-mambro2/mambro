@@ -62,15 +62,31 @@ use std::fmt;
 // Path and PathBuf handle file locations.
 use std::path::{Path, PathBuf};
 
-// Identifies an account. Gets combined
-// with ThirdPartyId in ConfigId, which
-// must be unique.
-//
-// Assets like email addresses and file
-// locations get assigned to ConfigIds.
+/// Identifies an account. Gets combined
+/// with ThirdPartyId in ConfigId, which
+/// must be unique.
+///
+/// Assets like email addresses and file
+/// locations get assigned to ConfigIds.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountId(Vec<u8>);
 impl From<&str> for AccountId {
+    // # Arguments
+    // - &str: a name that identifies an 
+    //         account. Should match a name
+    //         in the data store. The name 
+    //         gets copied and owned by the 
+    //         instance.
+    //
     fn from(s: &str) -> Self {
         AccountId::from(s)
     }
@@ -81,9 +97,19 @@ impl From<String> for AccountId {
     }
 }
 impl AccountId {
+    // # Arguments
+    // - &str: a name that identifies an 
+    //         account. Should match a name
+    //         in the data store. The name 
+    //         gets copied and owned by the 
+    //         instance.
+    //
     fn from(s: &str) -> AccountId {
         AccountId(s.as_bytes().to_vec())
     }
+
+    // Returns an owned, immutable copy of
+    // the name retained in this instance.
     pub fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
