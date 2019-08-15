@@ -5,7 +5,7 @@
 //
 // Author: A.E. Veltstra
 // Since: 2.19.501.900
-// Version: 2.19.814.622
+// Version: 2.19.814.2335
 
 // For compiling and debugging diesel,
 // we are required to increase the
@@ -78,22 +78,38 @@ use std::time::SystemTime;
 // arguments, with one argument equaling
 // `--account`, followed by the identifier.
 //
-// # Examples
-// ```
-// let mut args: Vec<String> = Vec::new();
-// args.push(String::from("nothing"));
-// args.push(String::from("nothing"));
-// args.push(String::from("--account"));
-// args.push(String::from("HaCoSandbox"));
-// args.push(String::from("nothing"));
-// let found = find_account_id(&args);
-// assert_eq!(true, found.is_some());
-// assert_eq!(Some("HaCoSandbox"), found);
-// ```
-fn find_account_id(args: &Vec<String>) -> Option<&str> {
+// 
+// # Arguments
+//
+// - args: a Vec<String> from for instance
+//       std::env::args().collect().
+//       A Vec<String> was chosen because
+//       that allows for easier testing than
+//       an env::Args.
+//
+//
+/// 
+/// # Examples
+///
+/// ```rust
+/// # extern crate orders;
+/// # fn main() {
+/// # use orders;
+/// let mut args: Vec<String> = Vec::new();
+/// args.push(String::from("nothing"));
+/// args.push(String::from("nothing"));
+/// args.push(String::from("--account"));
+/// args.push(String::from("HaCoSandbox"));
+/// args.push(String::from("nothing"));
+/// let found = orders::find_account_id(&args);
+/// assert_eq!(true, found.is_some());
+/// assert_eq!(Some("HaCoSandbox"), found);
+/// # }
+/// ```
+fn find_account_id(args: &[String]) -> Option<&str> {
     let mut i = args.len() - 1;
     while 1 < i {
-        i = i - 1;
+        i -= 1;
         let y: &str = &*args[i];
         if y.eq("--account") {
             let x = i + 1;
@@ -109,22 +125,33 @@ fn find_account_id(args: &Vec<String>) -> Option<&str> {
 // line arguments, with one argument equaling
 // `--thirdparty`, followed by the identifier.
 //
-// # Examples
-// ```
-// let mut args: Vec<String> = Vec::new();
-// args.push(String::from("nothing"));
-// args.push(String::from("--thirdparty"));
-// args.push(String::from("Joor"));
-// args.push(String::from("nothing"));
-// args.push(String::from("nothing"));
-// let found = find_third_party_id(&args);
-// assert_eq!(true, found.is_some());
-// assert_eq!(Some("Joor"), found);
-// ```
-fn find_third_party_id(args: &Vec<String>) -> Option<&str> {
+// 
+// # Arguments
+//
+// - args: a Vec<String> from for instance
+//       std::env::args().collect().
+//       A Vec<String> was chosen because
+//       that allows for easier testing than
+//       an env::Args.
+//
+/// 
+/// # Examples
+///
+/// ```rust
+/// let mut args: Vec<String> = Vec::new();
+/// args.push(String::from("nothing"));
+/// args.push(String::from("--thirdparty"));
+/// args.push(String::from("Joor"));
+/// args.push(String::from("nothing"));
+/// args.push(String::from("nothing"));
+/// let found = crate::find_third_party_id(&args);
+/// assert_eq!(true, found.is_some());
+/// assert_eq!(Some("Joor"), found);
+/// ```
+fn find_third_party_id(args: &[String]) -> Option<&str> {
     let mut i = args.len() - 1;
     while 1 < i {
-        i = i - 1;
+        i -= 1;
         let y: &str = &*args[i];
         if y.eq("--thirdparty") {
             let x = i + 1;
@@ -142,8 +169,36 @@ fn find_third_party_id(args: &Vec<String>) -> Option<&str> {
 // the data store for the account.
 // Warnings and errors get logged.
 //
+//
+// # Arguments
+//
+// Commandline parameters:
+//
+// - --account *NAME*: in which the literal
+//     `--account` indicates that the next
+//     argument (NAME) identifies an account,
+//     and NAME is to be subsituted by an
+//     account identifier that matches an
+//     account registration in the data store.
+//
+// - --thirdparty *NAME*: in which the literal
+//     `--thirdparty` indicates that the next
+//     argument (NAME) identifies a 3rd party,
+//     and NAME is to be subsituted by a 3rd-
+//     party identifier that matches a 3rd-
+//     party registration in the data store.
+//
+// Together, the account and third-party form
+// a unique combination, that has various
+// pieces of information assigned in the data
+// store. An account can exist at multiple
+// 3rd parties, so it is imperative to provide
+// the required one.
+//
+//
 // # Example run invocation:
-// ```
+//
+// ```text
 // > mambro/joor/download/orders --account HaCoSandbox --thirdparty Joor
 // ```
 //
