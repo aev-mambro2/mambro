@@ -92,9 +92,8 @@ use std::time::SystemTime;
 /// # Examples
 ///
 /// ```rust
-/// # extern crate orders;
 /// # fn main() {
-/// # use orders;
+/// # use crate::orders::*;
 /// let mut args: Vec<String> = Vec::new();
 /// args.push(String::from("nothing"));
 /// args.push(String::from("nothing"));
@@ -138,6 +137,7 @@ fn find_account_id(args: &[String]) -> Option<&str> {
 /// # Examples
 ///
 /// ```rust
+/// # use crate::orders::*;
 /// let mut args: Vec<String> = Vec::new();
 /// args.push(String::from("nothing"));
 /// args.push(String::from("--thirdparty"));

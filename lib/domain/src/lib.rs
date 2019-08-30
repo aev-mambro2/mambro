@@ -118,6 +118,15 @@ impl AccountId {
 // The intended use of a file location.
 // Gets combined with a folder path
 // and file name in a FileLocation.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
 impl PartialEq<&str> for FileLocationPurpose {
@@ -158,6 +167,15 @@ impl FileLocationPurpose {
 //
 // Assets like file locations and email
 // addresses get assigned to ConfigIds.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct ThirdPartyId(Vec<u8>);
 impl From<&str> for ThirdPartyId {
@@ -186,6 +204,15 @@ impl ThirdPartyId {
 //
 // This may be replaced with a standard
 // data type.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct URI(Vec<u8>);
 impl From<&str> for URI {
@@ -254,6 +281,15 @@ impl IMaybeEmpty for URI {
 // ThirdPartyId. Owns assets like email
 // addresses, file locations, credentials,
 // and communication addresses.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConfigId {
     pub account_id: AccountId,
@@ -284,6 +320,15 @@ impl ConfigId {
 //
 // In all cases encountered, 2 tokens and
 // a URI suffice to make a Credential.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token {
     pub key: SecUtf8,
@@ -306,6 +351,15 @@ impl Token {
 // All that is needed to authenticate against
 // a communication address. An account tends
 // to have exactly 1 instance of Credentials.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Credentials {
     pub uri: URI,
@@ -336,6 +390,15 @@ impl From<&models::Credentials> for crate::Credentials {
 // locations for multiple purposes. An
 // application tends to be built for a
 // single such purpose.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
@@ -380,6 +443,15 @@ impl crate::FileLocation {
 // Combines the ConfigId, Credentials,
 // FileLocations, and EmailAddresses
 // owned by a single account.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Account {
     pub config_id: crate::ConfigId,
@@ -397,6 +469,15 @@ impl IMaybeEmpty for Account {
 // account id and third party id.
 //
 // If not found, returns None.
+///
+///
+/// # Example
+///
+/// ```
+/// use crate::domain::AccountId;
+/// let id = AccountId::from("Hot Topic");
+/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// ```
 fn fetch_account(
     connection: &SqliteConnection,
     account_id: &str,
