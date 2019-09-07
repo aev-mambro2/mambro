@@ -21,7 +21,7 @@
 //
 // Author: A.E.Veltstra
 // Since: 2.19.501.900
-// Version: 2.19.7.31.744
+// Version: 2.19.906.2131
 
 // For compiling and debugging diesel,
 // we are required to increase the
@@ -81,10 +81,10 @@ use std::path::{Path, PathBuf};
 pub struct AccountId(Vec<u8>);
 impl From<&str> for AccountId {
     // # Arguments
-    // - &str: a name that identifies an 
+    // - &str: a name that identifies an
     //         account. Should match a name
-    //         in the data store. The name 
-    //         gets copied and owned by the 
+    //         in the data store. The name
+    //         gets copied and owned by the
     //         instance.
     //
     fn from(s: &str) -> Self {
@@ -98,10 +98,10 @@ impl From<String> for AccountId {
 }
 impl AccountId {
     // # Arguments
-    // - &str: a name that identifies an 
+    // - &str: a name that identifies an
     //         account. Should match a name
-    //         in the data store. The name 
-    //         gets copied and owned by the 
+    //         in the data store. The name
+    //         gets copied and owned by the
     //         instance.
     //
     fn from(s: &str) -> AccountId {
@@ -123,9 +123,9 @@ impl AccountId {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::FileLocationPurpose;
+/// let p = FileLocationPurpose::from("orders");
+/// assert_eq!("orders".to_string(), p.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
@@ -172,9 +172,9 @@ impl FileLocationPurpose {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::ThirdPartyId;
+/// let id = ThirdPartyId::from("Spencers");
+/// assert_eq!("Spencers".to_string(), id.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct ThirdPartyId(Vec<u8>);
@@ -209,9 +209,9 @@ impl ThirdPartyId {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::URI;
+/// let uri = URI::from("how://there.that/");
+/// assert_eq!("how://there.that/".to_string(), uri.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct URI(Vec<u8>);
@@ -286,9 +286,12 @@ impl IMaybeEmpty for URI {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::{AccountId, ConfigId, ThirdPartyId};
+/// let config = ConfigId {
+///   account_id: AccountId::from("hello"),
+///   third_party_id: ThirdPartyId::from("world")
+/// };
+/// assert_eq!("hello@world".to_string(), config.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConfigId {
@@ -325,9 +328,16 @@ impl ConfigId {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::Token;
+/// extern crate secstr;
+/// use secstr::*;
+/// let app1 = Token {
+///     key: SecUtf8::from("qwerty".as_bytes()),
+///     secret: SecUtf8::from("7#6$5".as_bytes()),
+/// };
+/// let app2 = Token::new("qwerty", "7#6$5");
+/// assert_eq!("***SECRET***:***SECRET***".to_string(), app1.to_string());
+/// assert_eq!(app1.to_string(), app2.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token {
@@ -340,11 +350,14 @@ impl IMaybeEmpty for Token {
     }
 }
 impl Token {
-    fn from(k: &str, s: &str) -> Self {
+    pub fn new(k: &str, s: &str) -> Self {
         Token {
             key: SecUtf8::from(k.as_bytes()),
             secret: SecUtf8::from(s.as_bytes()),
         }
+    }
+    pub fn to_string(&self) -> String {
+        [self.key.to_string(), self.secret.to_string()].join(":")
     }
 }
 
@@ -356,9 +369,13 @@ impl Token {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::{URI, Token, Credentials};
+/// let creds = Credentials {
+///     uri: URI::from("how://there.that/"),
+///     app: Token::new("oknbgr", "8-'$31?"),
+///     user: Token::new("HublOprc", "(2$05+@)")
+/// };
+/// assert_eq!("***SECRET***:***SECRET***".to_string(), creds.app.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Credentials {
@@ -375,8 +392,8 @@ impl From<&models::Credentials> for crate::Credentials {
     fn from(creds: &models::Credentials) -> Self {
         crate::Credentials {
             uri: URI::from(&creds.uri.as_str()),
-            app: Token::from(&creds.app_key.as_str(), &creds.app_secret.as_str()),
-            user: Token::from(&creds.user_key.as_str(), &creds.user_secret.as_str()),
+            app: Token::new(&creds.app_key.as_str(), &creds.app_secret.as_str()),
+            user: Token::new(&creds.user_key.as_str(), &creds.user_secret.as_str()),
         }
     }
 }
@@ -395,9 +412,13 @@ impl From<&models::Credentials> for crate::Credentials {
 /// # Example
 ///
 /// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
+/// use crate::domain::{FileLocation, FileLocationPurpose};;
+/// use std::path::Path;
+/// let there = FileLocation {
+///     purpose: FileLocationPurpose::from("inventoryRequests"),
+///     path: Path::new("/there/").join("that.kind")
+/// };
+/// assert_eq!("inventoryRequests".to_string(), there.purpose.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocation {
@@ -443,15 +464,6 @@ impl crate::FileLocation {
 // Combines the ConfigId, Credentials,
 // FileLocations, and EmailAddresses
 // owned by a single account.
-///
-///
-/// # Example
-///
-/// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
-/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Account {
     pub config_id: crate::ConfigId,
@@ -469,15 +481,6 @@ impl IMaybeEmpty for Account {
 // account id and third party id.
 //
 // If not found, returns None.
-///
-///
-/// # Example
-///
-/// ```
-/// use crate::domain::AccountId;
-/// let id = AccountId::from("Hot Topic");
-/// assert_eq!("Hot Topic".to_string(), id.to_string());
-/// ```
 fn fetch_account(
     connection: &SqliteConnection,
     account_id: &str,
@@ -544,6 +547,18 @@ fn fetch_file_locations(
     }
 }
 
+// Attempts to load an Account with Credentials
+// and FileLocations that match the passed-in
+// id and third party.
+///
+/// # Example
+///
+/// let id = "Levi's";
+/// let third_party = "Macy's":
+/// match attempt_load_account(id, third_party) {
+///   Some(account): assert_true!(true),
+///   None: assert_true!(true)
+/// }
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
     let connection = db::connect();
     match fetch_account(&connection, &id, &third_party) {

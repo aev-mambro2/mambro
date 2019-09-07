@@ -78,7 +78,7 @@ use std::time::SystemTime;
 // arguments, with one argument equaling
 // `--account`, followed by the identifier.
 //
-// 
+//
 // # Arguments
 //
 // - args: a Vec<String> from for instance
@@ -88,7 +88,7 @@ use std::time::SystemTime;
 //       an env::Args.
 //
 //
-/// 
+///
 /// # Examples
 ///
 /// ```rust
@@ -124,7 +124,7 @@ fn find_account_id(args: &[String]) -> Option<&str> {
 // line arguments, with one argument equaling
 // `--thirdparty`, followed by the identifier.
 //
-// 
+//
 // # Arguments
 //
 // - args: a Vec<String> from for instance
@@ -133,7 +133,7 @@ fn find_account_id(args: &[String]) -> Option<&str> {
 //       that allows for easier testing than
 //       an env::Args.
 //
-/// 
+///
 /// # Examples
 ///
 /// ```rust
