@@ -1,27 +1,27 @@
-// Downloads new orders from Joor for
-// accounts like Habitual Denim.
-// For installation instructions, refer to
-// installing.md.
-//
-// Author: A.E. Veltstra
-// Since: 2.19.501.900
-// Version: 2.19.814.2335
-
 // For compiling and debugging diesel,
 // we are required to increase the
 // recursion limit.
 #![recursion_limit = "128"]
+
+/// Downloads new orders from Joor for
+/// accounts like Habitual Denim.
+/// For installation instructions, refer to
+/// installing.md.
+///
+/// Author: A.E. Veltstra
+/// Since: 2.19.501.900
+/// Version: 2.19.920.2140
 
 // Domain holds semantically significant
 // data structures and maps them to
 // technical data store structures.
 extern crate domain;
 
-// Unit tests for this module.
+/// Unit tests for this module.
 #[cfg(test)]
 mod tests {
-    // The domain crate must let us create
-    // a file location instance.
+    /// The domain crate must let us create
+    /// a file location instance.
     #[test]
     fn can_create_file_location() {
         use domain;
@@ -34,10 +34,10 @@ mod tests {
         assert_eq!(fl.to_path(), Path::new(f).join(n));
     }
 
-    // The function find_account_id must find
-    // the expected array element based on
-    // its sort order immediately following
-    // an element containing "--account".
+    /// The function find_account_id must find
+    /// the expected array element based on
+    /// its sort order immediately following
+    /// an element containing "--account".
     #[test]
     fn can_locate_account_id() {
         let mut args: Vec<String> = Vec::new();
@@ -51,10 +51,10 @@ mod tests {
         assert_eq!(Some("HaCoSandbox"), found);
     }
 
-    // The function find_third_party_id must
-    // find the expected array element based
-    // on its sort order immediately aftee
-    // an element containing "--thirdparty".
+    /// The function find_third_party_id must
+    /// find the expected array element based
+    /// on its sort order immediately aftee
+    /// an element containing "--thirdparty".
     #[test]
     fn can_locate_third_party_id() {
         let mut args: Vec<String> = Vec::new();
@@ -72,22 +72,22 @@ use std::env;
 use std::time::SystemTime;
 //use glob::glob;
 
-// Rummages through the input to locate and
-// return something that might be an account
-// id. This assumes input is command-line
-// arguments, with one argument equaling
-// `--account`, followed by the identifier.
-//
-//
-// # Arguments
-//
-// - args: a Vec<String> from for instance
-//       std::env::args().collect().
-//       A Vec<String> was chosen because
-//       that allows for easier testing than
-//       an env::Args.
-//
-//
+/// Rummages through the input to locate and
+/// return something that might be an account
+/// id. This assumes input is command-line
+/// arguments, with one argument equaling
+/// `--account`, followed by the identifier.
+///
+///
+/// # Arguments
+///
+/// - args: a Vec<String> from for instance
+///       std::env::args().collect().
+///       A Vec<String> was chosen because
+///       that allows for easier testing than
+///       an env::Args.
+///
+///
 ///
 /// # Examples
 ///
@@ -118,21 +118,21 @@ fn find_account_id(args: &[String]) -> Option<&str> {
     None
 }
 
-// Rummages through the input to locate and
-// return something that might be a third-
-// party id. This assumes input is command-
-// line arguments, with one argument equaling
-// `--thirdparty`, followed by the identifier.
-//
-//
-// # Arguments
-//
-// - args: a Vec<String> from for instance
-//       std::env::args().collect().
-//       A Vec<String> was chosen because
-//       that allows for easier testing than
-//       an env::Args.
-//
+/// Rummages through the input to locate and
+/// return something that might be a third-
+/// party id. This assumes input is command-
+/// line arguments, with one argument equaling
+/// `--thirdparty`, followed by the identifier.
+///
+///
+/// # Arguments
+///
+/// - args: a Vec<String> from for instance
+///       std::env::args().collect().
+///       A Vec<String> was chosen because
+///       that allows for easier testing than
+///       an env::Args.
+///
 ///
 /// # Examples
 ///
@@ -161,50 +161,50 @@ fn find_third_party_id(args: &[String]) -> Option<&str> {
     None
 }
 
-// Execution entry point.
-// Resolves command-line arguments,
-// fetches a matching account, and
-// downloads its orders. Orders
-// get saved in the location set in
-// the data store for the account.
-// Warnings and errors get logged.
-//
-//
-// # Arguments
-//
-// Commandline parameters:
-//
-// - --account *NAME*: in which the literal
-//     `--account` indicates that the next
-//     argument (NAME) identifies an account,
-//     and NAME is to be subsituted by an
-//     account identifier that matches an
-//     account registration in the data store.
-//
-// - --thirdparty *NAME*: in which the literal
-//     `--thirdparty` indicates that the next
-//     argument (NAME) identifies a 3rd party,
-//     and NAME is to be subsituted by a 3rd-
-//     party identifier that matches a 3rd-
-//     party registration in the data store.
-//
-// Together, the account and third-party form
-// a unique combination, that has various
-// pieces of information assigned in the data
-// store. An account can exist at multiple
-// 3rd parties, so it is imperative to provide
-// the required one.
-//
-//
-// # Example run invocation:
-//
-// ```text
-// > mambro/joor/download/orders --account HaCoSandbox --thirdparty Joor
-// ```
-//
-// # Panics
-// If we failed to connect to the data store.
-//
+/// Execution entry point.
+/// Resolves command-line arguments,
+/// fetches a matching account, and
+/// downloads its orders. Orders
+/// get saved in the location set in
+/// the data store for the account.
+/// Warnings and errors get logged.
+///
+///
+/// # Arguments
+///
+/// Commandline parameters:
+///
+/// - --account *NAME*: in which the literal
+///     `--account` indicates that the next
+///     argument (NAME) identifies an account,
+///     and NAME is to be subsituted by an
+///     account identifier that matches an
+///     account registration in the data store.
+///
+/// - --thirdparty *NAME*: in which the literal
+///     `--thirdparty` indicates that the next
+///     argument (NAME) identifies a 3rd party,
+///     and NAME is to be subsituted by a 3rd-
+///     party identifier that matches a 3rd-
+///     party registration in the data store.
+///
+/// Together, the account and third-party form
+/// a unique combination, that has various
+/// pieces of information assigned in the data
+/// store. An account can exist at multiple
+/// 3rd parties, so it is imperative to provide
+/// the required one.
+///
+///
+/// # Example run invocation:
+///
+/// ```text
+/// > mambro/joor/download/orders --account HaCoSandbox --thirdparty Joor
+/// ```
+///
+/// # Panics
+/// If we failed to connect to the data store.
+///
 fn main() {
     let start = SystemTime::now();
     let args: Vec<_> = env::args().collect();
