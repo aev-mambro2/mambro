@@ -726,7 +726,8 @@ fn fetch_file_locations(
 ///   None: assert_true!(true)
 /// }
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
-    let connection = db::connect();
+    match db::try_connect() {
+        Ok(connection) => 
     match fetch_account(&connection, &id, &third_party) {
         None => None,
         Some(config_id) => match fetch_credentials(&connection, &config_id) {
@@ -737,5 +738,10 @@ pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
                 locations: fetch_file_locations(&connection, &config_id),
             }),
         },
+    },
+        Err(e) => { 
+            let msg = format!("Error connecting to db. Additional error message: {}.", &e).to_owned();
+            panic!(msg);
+        }
     }
 }

@@ -31,16 +31,19 @@ use std::env;
 /// extern crate db;
 /// use db;
 ///
-/// let connection = db::connect();
+/// let maybe_connection = db::try_connect();
+/// assert!(maybe_connection.is_ok());
+/// 
 /// ```
-pub fn connect() -> SqliteConnection {
+pub fn try_connect() -> ConnectionResult<SqliteConnection> {
     //initialize dotenv: we use that to read the 
     //local db url, to avoid hard-coding.
     dotenv().ok();
 
     //fetch the database locator
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set. Create a file named '.env' at the root of the project folder. Add a line starting with 'DATABASE_URL', add an = sign, and then add the absolute path to the sqlite3 database file.");
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set. Create a file named '.env' at the root of the project folder. Add a line starting with 'DATABASE_URL', add an = sign, and then add the absolute path to the sqlite3 database file. No ~ path, no quotes, no spaces, no protocol, no substitutions.");
 
-    //create and return the db connection
-    SqliteConnection::establish(&database_url).expect(&format!("Error connecting to db. Attempting to connect to {}.", &database_url))
+    //attempt to create and return the db connection
+    SqliteConnection::establish(&database_url)
+        //.expect(&format!("Error connecting to db. Attempting to connect to {}.", &database_url))
 }
