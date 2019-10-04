@@ -6,7 +6,7 @@ mod tests {
     }
 }
 
-///! Fluent SQL Statement Builder
+///! Fluent TSQL Statement Builder
 ///!
 ///! @author A.E.Veltstra
 ///! @since 2.19.1003.2150
@@ -18,7 +18,7 @@ pub struct SqlBuilder {
 const SELECT: &'static str = "select ";
 const TOP: &'static str = "top ";
 
-/// Starts a new SQL statement builder.
+/// Starts a new TSQL statement builder.
 ///
 /// # Examples
 /// ```rust

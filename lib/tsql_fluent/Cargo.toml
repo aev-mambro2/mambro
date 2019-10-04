@@ -1,0 +1,10 @@
+[package]
+name = "tsql_fluent"
+version = "0.1.0"
+authors = ["aev-mambro2 <42442483+aev-mambro2@users.noreply.github.com>"]
+edition = "2018"
+description = "Helps generate TSQL statements in a fluent manner, to limit code duplication. TSQL is a dialect on SQL, developed and maintained by Microsoft, for use in their SQLServer RDBMS. TSQL is used for DML and DDL. This lib implements a tiny subset of that language, focusing on queries."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
