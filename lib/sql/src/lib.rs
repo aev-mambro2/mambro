@@ -30,6 +30,53 @@ pub fn select() -> SqlBuilder {
     SqlBuilder { buffer: SELECT.to_owned() }
 }
 
+/// Starts a new SQL statement builder with 
+/// a single field name. If you want to use 
+/// a name that requires escaping due to data 
+/// store rules, do escape it first.
+///
+/// # Examples
+/// ```rust
+/// use sql::*;
+/// let n = "id".to_string();
+/// let s = select_n(n);
+/// assert_eq!(s.to_string(), "select id ".to_string());
+/// ```
+pub fn select_n(n: String) -> SqlBuilder {
+    let b = format!("{}{} ", SELECT, n);
+    SqlBuilder { buffer: b }
+}
+
+/// Starts a new SQL statement builder with 
+/// a single field name. If you want to use 
+/// a name that requires escaping due to data 
+/// store rules, do escape it first.
+///
+/// # Examples
+/// ```rust
+/// use sql::*;
+/// let a = "a".to_string();
+/// let b = "b".to_string();
+/// let c = "c".to_string();
+/// let m = vec![a, b, c];
+/// let s = select_m(m);
+/// assert_eq!(s.to_string(), "select a, b, c ".to_string());
+/// ```
+pub fn select_m(m: Vec<String>) -> SqlBuilder {
+    let mut b = SELECT.to_owned();
+    if let Some((last, more)) = m.split_last() {
+        for f in more {
+            b.push_str(f);
+            b.push_str(", ");
+        }
+        b.push_str(last);
+        b.push_str(" ");
+    }
+
+    let c = b;
+    SqlBuilder { buffer: c }
+}
+
 impl SqlBuilder {
     /// Finalize the statement and 
     /// output it as a String.
