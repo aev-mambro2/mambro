@@ -99,4 +99,20 @@ impl SqlBuilder {
         SqlBuilder { buffer: n }
     }
 
+    /// Add the start of the TOP clause 
+    /// followed by the max amount of records 
+    /// to return, to the existing statement.
+    ///
+    /// 
+    /// # Examples
+    /// ```rust
+    /// use sql::*;
+    /// let t = select().top_x(5);
+    /// assert_eq!(t.to_string(), "select top 5 ".to_string());
+    /// ```
+    pub fn top_x (&self, x: i64) -> Self {
+        let n = format!("{}{}{} ", self.buffer, TOP, x);
+        SqlBuilder { buffer: n }
+    }
+
 }
