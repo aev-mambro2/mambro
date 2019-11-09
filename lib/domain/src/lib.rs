@@ -21,18 +21,12 @@
 //!
 //! Author: A.E.Veltstra  
 //! Since: 2.19.501.900  
-//! Version: 2.19.906.2131  
+//! Version: 2.19.1028.1741
 
-// For compiling and debugging diesel,
-// we are required to increase the
-// recursion limit.
-#![recursion_limit = "128"]
-
-/// Prelude contains things that should have
-/// been included in the main diesel crate,
-/// but whatever.
-extern crate diesel;
-use diesel::prelude::*;
+//  Crate sqlite gives us low-level access to the 
+//  data store without getting in our way (like 
+//  diesel and other binding modules do).
+extern crate sqlite;
 
 /// SecStr destroys sensitive data from
 /// memory once done.
@@ -42,11 +36,9 @@ use secstr::*;
 /// Mambro db knows the layout of the
 /// data store.
 extern crate db;
-
-/// Db models contain rust-based data
-/// wrappers around the data store's
-/// structures.
-extern crate models;
+  
+/// Tsql_fluent helps build SQL statements.
+extern crate tsql_fluent;
 
 /// OsStr is used for O.S.-specific texts
 /// (like file paths and names), that can
@@ -57,10 +49,13 @@ use std::ffi::OsStr;
 /// Fmt helps us share human-readable views
 /// on the data retained by the data types
 /// in this module.
-use std::fmt;
+/// use std::fmt;
 
 /// Path and PathBuf handle file locations.
 use std::path::{Path, PathBuf};
+
+/// We have multiple structs that need this trait.
+use std::string::{String, ToString};
 
 /// Identifies an account. Gets combined
 /// with ThirdPartyId in ConfigId, which
@@ -92,7 +87,9 @@ impl From<&str> for AccountId {
     ///         instance.
     ///
     fn from(s: &str) -> Self {
-        AccountId::from(s)
+        AccountId {
+            0: s.as_bytes().to_vec()
+        }
     }
 }
 
@@ -111,26 +108,10 @@ impl From<String> for AccountId {
     }
 }
 
-
-impl AccountId {
-    /// Converts from a common string slice.
-    ///
-    ///
-    /// # Arguments
-    ///
-    /// - &str: a name that identifies an
-    ///         account. Should match a name
-    ///         in the data store. The name
-    ///         gets copied and owned by the
-    ///         instance.
-    ///
-    fn from(s: &str) -> AccountId {
-        AccountId(s.as_bytes().to_vec())
-    }
-
+impl ToString for AccountId {
     /// Returns an owned, immutable copy of
     /// the name retained in this instance.
-    pub fn to_string(&self) -> String {
+    fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
@@ -160,14 +141,6 @@ impl PartialEq<&str> for FileLocationPurpose {
         self.eq(&other)
     }
 }
-/// To make the purpose display as a word,
-/// rather than a byte array. 
-// Failed.
-impl fmt::Display for FileLocationPurpose {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.to_string(), f)
-    }
-}
 /// Convert from a common string slice.
 impl From<&str> for FileLocationPurpose {
     /// Converts from a common string slice.
@@ -182,7 +155,9 @@ impl From<&str> for FileLocationPurpose {
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
-        FileLocationPurpose::from(s)
+        FileLocationPurpose {
+            0: s.as_bytes().to_vec()
+        }
     }
 }
 
@@ -204,22 +179,8 @@ impl From<String> for FileLocationPurpose {
     }
 }
 
-impl FileLocationPurpose {
-    /// Converts from a common string slice.
-    ///
-    ///
-    /// # Arguments
-    ///
-    /// - &str: a name that identifies why a
-    ///         location is used. Should 
-    ///         match a purpose in the data 
-    ///         store. The name gets copied 
-    ///         and owned by the instance.
-    ///
-    fn from(s: &str) -> FileLocationPurpose {
-        FileLocationPurpose(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
+impl ToString for FileLocationPurpose {
+    fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
@@ -257,7 +218,9 @@ impl From<&str> for ThirdPartyId {
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
-        ThirdPartyId::from(s)
+        ThirdPartyId {
+           0: s.as_bytes().to_vec()
+        }
     }
 }
 
@@ -279,22 +242,8 @@ impl From<String> for ThirdPartyId {
     }
 }
 
-impl ThirdPartyId {
-    /// Converts from a common string slice.
-    ///
-    ///
-    /// # Arguments
-    ///
-    /// - &str: a name that identifies a
-    ///         remote partner. Should match
-    ///         a third party in the data 
-    ///         store. The name gets copied 
-    ///         and owned by the instance.
-    ///
-    fn from(s: &str) -> ThirdPartyId {
-        ThirdPartyId(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
+impl ToString for ThirdPartyId {
+    fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
@@ -338,7 +287,9 @@ impl From<&str> for URI {
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
-        URI::from(s)
+        URI {
+            0: s.as_bytes().to_vec()
+        }
     }
 }
 
@@ -365,27 +316,8 @@ impl From<String> for URI {
     }
 }
 
-impl URI {
-    /// Converts from a common string slice.
-    ///
-    ///
-    /// # Arguments
-    ///
-    /// - &str: a web address to use for 
-    ///         reaching out to the remote 
-    ///         partner's web / REST servers. 
-    ///         Suffix with / if the last 
-    ///         part is a TLD or a folder. 
-    ///         Omit the end / if the last
-    ///         part is a document or query 
-    ///         value.
-    ///         The address gets copied 
-    ///         and owned by the instance.
-    ///
-    fn from(s: &str) -> URI {
-        URI(s.as_bytes().to_vec())
-    }
-    pub fn to_string(&self) -> String {
+impl ToString for URI {
+    fn to_string(&self) -> String {
         String::from_utf8(self.0.as_slice().to_vec()).unwrap()
     }
 }
@@ -459,16 +391,33 @@ impl IMaybeEmpty for ConfigId {
         self.account_id.is_empty() && self.third_party_id.is_empty()
     }
 }
-impl From<&models::Accounts> for ConfigId {
-    fn from(acc: &models::Accounts) -> Self {
-        ConfigId {
-            account_id: AccountId::from(&acc.id.as_str()),
-            third_party_id: ThirdPartyId::from(&acc.third_party.as_str()),
+
+// Now we're combining things we need a New trait
+// that can accept multiple type parameters.
+pub trait New<R, S> {
+    fn new(r: R, s: S) -> Self;
+}
+
+impl New<String, String> for ConfigId {
+    fn new(a: String, b: String) -> Self {
+        ConfigId { 
+            account_id: AccountId::from(a),
+            third_party_id: ThirdPartyId::from(b),
         }
     }
 }
-impl ConfigId {
-    pub fn to_string(&self) -> String {
+
+impl New<&str, &str> for ConfigId {
+    fn new(a: &str, b: &str) -> Self {
+        ConfigId { 
+            account_id: AccountId::from(a),
+            third_party_id: ThirdPartyId::from(b),
+        }
+    }
+}
+
+impl ToString for ConfigId  {
+    fn to_string(&self) -> String {
         [self.account_id.to_string(), self.third_party_id.to_string()].join("@")
     }
 }
@@ -483,17 +432,35 @@ impl ConfigId {
 ///
 /// # Example
 ///
+/// Create a new token from string slices.
+/// When turning them into a trivial string,
+/// they must hide their true value.
+///
 /// ```
 /// use crate::domain::Token;
+/// use crate::domain::New;
+/// let app1 = Token::new("qwerty", "7#6$5");
+/// assert_eq!("***SECRET***:***SECRET***".to_string(), app1.to_string());
+/// ```
+///
+/// # Example 
+///   
+/// Create 2 different tokens in differing ways.
+/// If their contents differs, then a trivial 
+/// comparison of their to_string() must think 
+/// they are the same.
+///
+/// ```
+/// use crate::domain::Token;
+/// use crate::domain::New;
 /// extern crate secstr;
 /// use secstr::*;
-/// let app1 = Token {
-///     key: SecUtf8::from("qwerty".as_bytes()),
+/// let apples = Token {
+///     key: SecUtf8::from("apples".as_bytes()),
 ///     secret: SecUtf8::from("7#6$5".as_bytes()),
 /// };
-/// let app2 = Token::new("qwerty", "7#6$5");
-/// assert_eq!("***SECRET***:***SECRET***".to_string(), app1.to_string());
-/// assert_eq!(app1.to_string(), app2.to_string());
+/// let pears = Token::new("pears", "7#6$5");
+/// assert_eq!(apples.to_string(), pears.to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token {
@@ -505,21 +472,71 @@ impl IMaybeEmpty for Token {
         self.key.is_empty() && self.secret.is_empty()
     }
 }
-impl Token {
+impl New<&str, &str> for Token {
     /// Create from 2 common string slices.
     /// Internally uses SecStr for holding 
     /// each passed-in value. SecStr not 
     /// only masks the value when displaying,
     /// it also destroys the value from 
     /// memory after use.
-    pub fn new(k: &str, s: &str) -> Self {
+    fn new(k: &str, s: &str) -> Self {
         Token {
             key: SecUtf8::from(k.as_bytes()),
             secret: SecUtf8::from(s.as_bytes()),
         }
     }
-    pub fn to_string(&self) -> String {
+}
+// Use this method to generate a trivial copy of
+// the values in this token. The values will not 
+// be revealed. Instead they are substituted by 
+// a constant expression '***SECRET***'.
+// This is done to prevent accidental reveals 
+// via (for instance) debug, display, or format.
+// To generate a revealing copy, use unsecure_to_string().
+impl ToString for Token {
+    fn to_string(&self) -> String {
         [self.key.to_string(), self.secret.to_string()].join(":")
+    }
+}
+// Use this method to generate a revealing copy
+// of the values contained in this token.
+//
+///
+/// # Example
+///
+/// Create a new token from string slices.
+/// When turning them into an unsecure string,
+/// they must reveal their true value.
+///
+/// ```
+/// use crate::domain::Token;
+/// use crate::domain::New;
+/// let app1 = Token::new("qwerty", "7#6$5");
+/// assert_eq!("qwerty:7#6$5".to_string(), app1.unsecure_to_string());
+/// ```
+///
+/// # Example 
+///   
+/// Create 2 tokens in differing ways, and 
+/// if their contents is different, then they are 
+/// different.
+///
+/// ```
+/// use crate::domain::Token;
+/// use crate::domain::New;
+/// extern crate secstr;
+/// use secstr::*;
+/// let apples = Token {
+///     key: SecUtf8::from("apples".as_bytes()),
+///     secret: SecUtf8::from("7#6$5".as_bytes()),
+/// };
+/// let pears = Token::new("pears", "7#6$5");
+/// assert_ne!(apples.unsecure_to_string(), pears.unsecure_to_string());
+/// ```
+impl Token {
+    pub fn unsecure_to_string(&self) -> String {
+        
+        [self.key.unsecure().to_string(), self.secret.unsecure().to_string()].join(":")
     }
 }
 
@@ -531,13 +548,14 @@ impl Token {
 /// # Example
 ///
 /// ```
-/// use crate::domain::{URI, Token, Credentials};
+/// use crate::domain::{New, URI, Token, Credentials};
 /// let creds = Credentials {
 ///     uri: URI::from("how://there.that/"),
 ///     app: Token::new("oknbgr", "8-'$31?"),
 ///     user: Token::new("HublOprc", "(2$05+@)")
 /// };
 /// assert_eq!("***SECRET***:***SECRET***".to_string(), creds.app.to_string());
+/// assert_eq!("HublOprc:(2$05+@)".to_string(), creds.user.unsecure_to_string());
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct Credentials {
@@ -545,18 +563,9 @@ pub struct Credentials {
     pub app: Token,
     pub user: Token,
 }
-impl IMaybeEmpty for crate::Credentials {
+impl IMaybeEmpty for Credentials {
     fn is_empty(&self) -> bool {
         self.uri.is_empty() && self.app.is_empty() && self.user.is_empty()
-    }
-}
-impl From<&models::Credentials> for crate::Credentials {
-    fn from(creds: &models::Credentials) -> Self {
-        crate::Credentials {
-            uri: URI::from(&creds.uri.as_str()),
-            app: Token::new(&creds.app_key.as_str(), &creds.app_secret.as_str()),
-            user: Token::new(&creds.user_key.as_str(), &creds.user_secret.as_str()),
-        }
     }
 }
 
@@ -587,42 +596,44 @@ pub struct FileLocation {
     pub purpose: FileLocationPurpose,
     pub path: PathBuf,
 }
+
 impl IMaybeEmpty for FileLocation {
     fn is_empty(&self) -> bool {
         self.path.is_empty()
     }
 }
-impl From<&models::FileLocations> for crate::FileLocation {
-    fn from(it: &models::FileLocations) -> Self {
-        crate::FileLocation {
-            purpose: FileLocationPurpose::from(&it.purpose.as_str()),
-            path: Path::new(&it.folder).join(&it.name),
+
+impl From<&(&str, &str, &str)> for FileLocation {
+    fn from(that: &(&str, &str, &str)) -> Self {
+        let (how, folder, name) = that;
+        FileLocation {
+            purpose: FileLocationPurpose::from(*how),
+            path: Path::new(*folder).join(*name),
         }
     }
 }
-impl crate::FileLocation {
+
+impl FileLocation {
     pub fn extension(&self) -> Option<&OsStr> {
         self.path.extension()
     }
-    fn from_all(them: &[models::FileLocations]) -> Vec<crate::FileLocation> {
-        let mut buffer: Vec<crate::FileLocation> = Vec::with_capacity(them.len());
+    pub fn from_all(them: &Vec<(&str, &str, &str)>) -> Vec<FileLocation> {
+        let mut buffer: Vec<FileLocation> = Vec::with_capacity(them.len());
         for item in them {
-            buffer.push(crate::FileLocation::from(item));
+            buffer.push(FileLocation::from(item));
         }
         buffer.dedup();
         buffer
     }
+}
 
-    /// Create from 3 common string slices.
-    /// The new instance winds up owning the 
-    /// passed-in contents.
-    pub fn new(p: &str, f: &str, n: &str) -> crate::FileLocation {
-        FileLocation {
-            purpose: FileLocationPurpose::from(p),
-            path: Path::new(f).join(n),
-        }
-    }
-    pub fn to_path(&self) -> &Path {
+// Let's ensure that we can make paths in a 
+// language-safe way.
+pub trait ToPath {
+    fn to_path(&self) -> &Path;
+}
+impl ToPath for FileLocation {
+    fn to_path(&self) -> &Path {
         self.path.as_path()
     }
 }
@@ -632,9 +643,9 @@ impl crate::FileLocation {
 // owned by a single account.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Account {
-    pub config_id: crate::ConfigId,
-    pub credentials: crate::Credentials,
-    pub locations: Vec<crate::FileLocation>,
+    pub config_id: ConfigId,
+    pub credentials: Credentials,
+    pub locations: Vec<FileLocation>,
 }
 impl IMaybeEmpty for Account {
     fn is_empty(&self) -> bool {
@@ -648,22 +659,25 @@ impl IMaybeEmpty for Account {
 //
 // If not found, returns None.
 fn fetch_account(
-    connection: &SqliteConnection,
+    connection: &sqlite::Connection,
     account_id: &str,
     third_party: &str,
 ) -> Option<ConfigId> {
-    use diesel::prelude::*;
-    use schema::accounts::dsl::*;
-    let results = accounts
-        .filter(thirdParty.eq(&third_party))
-        .filter(id.eq(&account_id))
-        .limit(1)
-        .load::<models::Accounts>(connection)
-        .expect("Error loading accounts");
-    if results.is_empty() {
-        return None;
+    use tsql_fluent::*;
+    match sqlite.execute(
+        select_c(1)
+        .from("accounts")
+        .where("id")
+        .equals(account_id)
+        .and("third_party_id")
+        .equals(third_party)
+        .to_string()
+        ) {
+        Ok(row) => {
+            Some(ConfigId::new(account_id, third_party));
+        }
+        Err(e) => None
     }
-    return Some(ConfigId::from(&results[0]));
 }
 
 // Attempts to load from the data store those
@@ -672,21 +686,17 @@ fn fetch_account(
 //
 // If not found, returns None.
 fn fetch_credentials(
-    connection: &SqliteConnection,
+    connection: &sqlite::Connection,
     config_id: &ConfigId,
-) -> Option<crate::Credentials> {
-    use diesel::prelude::*;
-    use schema::credentials::dsl::*;
-    let results = credentials
-        .filter(thirdParty.eq(&config_id.third_party_id.to_string()))
-        .filter(account.eq(&config_id.account_id.to_string()))
-        .limit(1)
-        .load::<models::Credentials>(connection)
-        .expect("Error loading credentials");
-    if results.is_empty() {
+) -> Option<Credentials> {
+    if 1 == 2 {
         None
     } else {
-        Some(crate::Credentials::from(&results[0]))
+        Some(Credentials {
+            uri: URI::from(""),
+            app: Token::new("", ""),
+            user: Token::new("", ""),
+        })
     }
 }
 
@@ -696,20 +706,15 @@ fn fetch_credentials(
 //
 // If not found, returns None.
 fn fetch_file_locations(
-    connection: &SqliteConnection,
+    connection: &sqlite::Connection,
     config_id: &ConfigId,
-) -> Vec<crate::FileLocation> {
-    use diesel::prelude::*;
-    use schema::fileLocations::dsl::*;
-    let results = fileLocations
-        .filter(thirdParty.eq(&config_id.third_party_id.to_string()))
-        .filter(account.eq(&config_id.account_id.to_string()))
-        .load::<models::FileLocations>(connection)
-        .expect("Error loading file locations");
-    if results.is_empty() {
+) -> Vec<FileLocation> {
+    if 2 == 1 {
         vec![]
     } else {
-        crate::FileLocation::from_all(&results)
+        FileLocation::from_all(&vec![
+         ("", "", "")
+        ])
     }
 }
 
@@ -728,17 +733,17 @@ fn fetch_file_locations(
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
     match db::try_connect() {
         Ok(connection) => 
-    match fetch_account(&connection, &id, &third_party) {
-        None => None,
-        Some(config_id) => match fetch_credentials(&connection, &config_id) {
-            None => None,
-            Some(creds) => Some(crate::Account {
-                config_id: config_id.clone(),
-                credentials: creds.clone(),
-                locations: fetch_file_locations(&connection, &config_id),
-            }),
+            match fetch_account(&connection, &id, &third_party) {
+                None => None,
+                Some(config_id) => match fetch_credentials(&connection, &config_id) {
+                    None => None,
+                    Some(creds) => Some(Account {
+                        config_id: config_id.clone(),
+                        credentials: creds.clone(),
+                        locations: fetch_file_locations(&connection, &config_id),
+                }),
+            },
         },
-    },
         Err(e) => { 
             let msg = format!("Error connecting to db. Additional error message: {}.", &e).to_owned();
             panic!(msg);

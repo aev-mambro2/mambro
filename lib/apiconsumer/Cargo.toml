@@ -1,9 +1,10 @@
 [package]
 name = "apiconsumer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["aev-mambro2 <42442483+aev-mambro2@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
 sxd-xpath = "0.4.2"
 sxd-document = "0.3.2"
+domain = { version = "0.2.0", path = "../domain" }

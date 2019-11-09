@@ -1,28 +1,24 @@
-#![recursion_limit = "128"]
 /// Handles data input and output to our
 /// data store.
 ///
 /// Author: A.E.Veltstra
 /// Since: 2.19.501.900
-/// Version: 2.19.924.2148
+/// Version: 2.19.1027.751
+///
 
-// For compiling and debugging diesel, we are 
-// required to increase the recursion limit.
+//The 1 method in this module returns a Result.
+use Result;
 
-// Prelude contains things that should have
-// been included in the main diesel crate,
-// but whatever.
-extern crate diesel;
-use diesel::prelude::*;
+//The sqlite crate lets us talk to an sqlite data store.
+extern crate sqlite;
+//The Result return by the 1 method in thid module
+//contains an Sqlite Connection.
+//But in case of failure, we might get an Sqlite
+//Error, instead.
 
 // DotEnv lets us read configurations from
 // a local file.
 extern crate dotenv;
-use dotenv::dotenv;
-
-// Env gives access to the world outside
-// of rust and the app.
-use std::env;
 
 /// Creates a connection to our data store.
 ///
@@ -35,15 +31,11 @@ use std::env;
 /// assert!(maybe_connection.is_ok());
 /// 
 /// ```
-pub fn try_connect() -> ConnectionResult<SqliteConnection> {
-    //initialize dotenv: we use that to read the 
-    //local db url, to avoid hard-coding.
-    dotenv().ok();
+pub fn try_connect() -> Result<sqlite::Connection, sqlite::Error> {
 
     //fetch the database locator
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set. Create a file named '.env' at the root of the project folder. Add a line starting with 'DATABASE_URL', add an = sign, and then add the absolute path to the sqlite3 database file. No ~ path, no quotes, no spaces, no protocol, no substitutions.");
+    let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL must be set. Create a file named '.env' at the root of the project folder. Add a line starting with 'DATABASE_URL', add an = sign, and then add the absolute path to the sqlite3 database file. No ~ path, no quotes, no spaces, no protocol, no substitutions.");
 
     //attempt to create and return the db connection
-    SqliteConnection::establish(&database_url)
-        //.expect(&format!("Error connecting to db. Attempting to connect to {}.", &database_url))
+    sqlite::open(&database_url)
 }
