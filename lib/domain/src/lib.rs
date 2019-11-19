@@ -653,11 +653,20 @@ impl IMaybeEmpty for Account {
     }
 }
 
-// Attempts to fetch that ConfigId from the
-// data store which matches the passed-in
-// account id and third party id.
-//
-// If not found, returns None.
+/// Attempts to fetch that ConfigId from the
+/// data store which matches the passed-in
+/// account id and third party id.
+///
+/// If not found, returns None.
+/// 
+///
+/// # Parameters
+/// 1. SqliteConnection should supply access 
+///    to the data store.
+/// 2. Account identifier as a string slice.
+///    Should specify which account to find.
+/// 3. Third-party identifier as string slice.
+///    Should specify 
 fn fetch_account(
     connection: &sqlite::Connection,
     account_id: &str,
@@ -665,14 +674,20 @@ fn fetch_account(
 ) -> Option<ConfigId> {
     use tsql_fluent::*;
     match sqlite.execute(
+    let mut statement = connection.prepare(
         select_c(1)
-        .from("accounts")
-        .where("id")
-        .equals(account_id)
-        .and("third_party_id")
-        .equals(third_party)
+        .from("accounts".to_string())
+        .where_start("id".to_string())
+        .equals()
+        .?()
+        .and("thirdParty".to_string())
+        .equals()
+        .?()
         .to_string()
-        ) {
+    ).unwrap();
+    statement.bind(1, account_id).unwrap();
+    statement.bind(2, third_party).unwrap();
+    while let State::Row = statement.next().unwrap() {
         Ok(row) => {
             Some(ConfigId::new(account_id, third_party));
         }

@@ -402,9 +402,36 @@ impl SqlBuilder {
         SqlBuilder { buffer: b, }
     }
 
-    /// Adds the EQUALS clause to the SQL statement.
-    /// This is used to specify criteria values
-    /// that row columnss must match in order to 
+
+    /// Adds the EQUALS clause to the SQL statement,
+    /// allowing to enter a parameter question mark
+    /// that allows you to later add a value that 
+    /// row columns must match in order to 
+    /// get included in the returned result. You
+    /// must apply proper quoting and escaping. 
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use tsql_fluent::*;
+    /// let f = select_i(1)
+    ///         .from("authors".to_string())
+    ///         .where_start("book".to_string())
+    ///         .equals_q();
+    /// assert_eq!(
+    ///     "select 1 from [authors] where [book] = ? ", 
+    ///     f.as_str()
+    /// );
+    /// ```
+    pub fn equals_q (&self) -> Self {
+        let b = format!("{}{}? ", self.buffer, EQUALS);
+        SqlBuilder { buffer: b, }
+    }
+
+    /// Adds the EQUALS clause to the SQL statement,
+    /// allowing to enter the value 
+    /// that row columns must match in order to 
     /// get included in the returned result. You
     /// must apply proper quoting and escaping. 
     ///
@@ -416,13 +443,13 @@ impl SqlBuilder {
     /// let f = select_i(1)
     ///         .from("employees".to_string())
     ///         .where_start("name".to_string())
-    ///         .equals("'Pratchett'".to_string());
+    ///         .equals_value("'Pratchett'".to_string());
     /// assert_eq!(
     ///     "select 1 from [employees] where [name] = 'Pratchett' ", 
     ///     f.as_str()
     /// );
     /// ```
-    pub fn equals (&self, value: String) -> Self {
+    pub fn equals_value (&self, value: String) -> Self {
         let b = format!("{}{}{} ", self.buffer, EQUALS, value);
         SqlBuilder { buffer: b, }
     }
@@ -440,7 +467,7 @@ impl SqlBuilder {
     ///         .from("employees".to_string())
     ///         .alias("workers".to_string())
     ///         .where_start("name".to_string())
-    ///         .equals("'Pratchett'".to_string())
+    ///         .equals_value("'Pratchett'".to_string())
     ///         .and("first".to_string())
     ///         .is_not_null();
     /// assert_eq!(
