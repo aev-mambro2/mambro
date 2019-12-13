@@ -268,6 +268,14 @@ impl ToString for ThirdPartyId {
 #[derive(Clone, Debug, PartialEq)]
 pub struct URI(Vec<u8>);
 
+impl URI {
+    pub fn empty() -> Self {
+        URI {
+            0: vec![]
+        }
+    }
+}
+
 /// Convert from a common string slice.
 impl From<&str> for URI {
     /// Converts from a common string slice.
@@ -293,14 +301,39 @@ impl From<&str> for URI {
     }
 }
 
-/// Convert from a common string slice.
+/// Convert from a standard string.
 impl From<String> for URI {
-    /// Converts from a common string..
+    /// Converts from a standard string.
     ///
     ///
     /// # Arguments
     ///
-    /// - &str: a web address to use for 
+    /// - String: a web address to use for 
+    ///           reaching out to the remote 
+    ///           partner's web / REST servers. 
+    ///           Suffix with / if the last 
+    ///           part is a TLD or a folder. 
+    ///           Omit the end / if the last
+    ///           part is a document or query 
+    ///           value.
+    ///           The address gets copied 
+    ///           and owned by the instance.
+    /// 
+    fn from(s: String) -> Self {
+        URI::from(s.as_str())
+    }
+}
+
+/// Convert from a standard Option that holds a String.
+impl From<Option<String>> for URI {
+    /// Converts from a standard Option that 
+    /// holds a String.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// - Option<String>:  
+    ///         a web address to use for 
     ///         reaching out to the remote 
     ///         partner's web / REST servers. 
     ///         Suffix with / if the last 
@@ -311,8 +344,11 @@ impl From<String> for URI {
     ///         The address gets copied 
     ///         and owned by the instance.
     ///
-    fn from(s: String) -> Self {
-        URI::from(s.as_str())
+    fn from(s: Option<String>) -> Self {
+        match s {
+            None => URI::empty(),
+            Some(t) => URI::from(t.as_str())
+        }
     }
 }
 
@@ -467,11 +503,13 @@ pub struct Token {
     pub key: SecUtf8,
     pub secret: SecUtf8,
 }
+
 impl IMaybeEmpty for Token {
     fn is_empty(&self) -> bool {
         self.key.is_empty() && self.secret.is_empty()
     }
 }
+
 impl New<&str, &str> for Token {
     /// Create from 2 common string slices.
     /// Internally uses SecStr for holding 
@@ -486,6 +524,30 @@ impl New<&str, &str> for Token {
         }
     }
 }
+
+impl New<Option<String>, Option<String>> for Token {
+    /// Create from 2 standard Options holding a String.
+    /// Internally uses SecStr for holding 
+    /// each passed-in value. SecStr not 
+    /// only masks the value when displaying,
+    /// it also destroys the value from 
+    /// memory after use.
+    fn new(k: Option<String>, s: Option<String>) -> Self {
+        match k {
+            None => Token::empty(),
+            Some(k2) => match s {
+                None => Token::empty(),
+                Some(s2) => 
+                    Token {
+                        key: SecUtf8::from(k2.as_bytes()),
+                        secret: SecUtf8::from(s2.as_bytes()),
+                    }
+            }
+        }
+    }
+}
+
+
 // Use this method to generate a trivial copy of
 // the values in this token. The values will not 
 // be revealed. Instead they are substituted by 
@@ -498,6 +560,7 @@ impl ToString for Token {
         [self.key.to_string(), self.secret.to_string()].join(":")
     }
 }
+
 // Use this method to generate a revealing copy
 // of the values contained in this token.
 //
@@ -535,8 +598,13 @@ impl ToString for Token {
 /// ```
 impl Token {
     pub fn unsecure_to_string(&self) -> String {
-        
         [self.key.unsecure().to_string(), self.secret.unsecure().to_string()].join(":")
+    }
+    pub fn empty() -> Token {
+      Token {
+        key: SecUtf8::from(""),
+        secret: SecUtf8::from(""),
+      }
     }
 }
 
@@ -697,11 +765,13 @@ fn fetch_account(
 ) -> Option<ConfigId> {
     use tsql_fluent::*;
     connection.prepare(
-        select_i(1)
+        1.select()
         .from("accounts".to_string())
-        .where_field("id".to_string())
+        .wher()
+        .field("id".to_string())
         .equals_param()
-        .and_field("thirdParty".to_string())
+        .and()
+        .field("thirdParty".to_string())
         .equals_param()
         .to_string()
     ).ok().and_then(
@@ -744,28 +814,30 @@ fn fetch_credentials(
 ) -> Option<Credentials> {
     use tsql_fluent::*;
     connection.prepare(
-        select_fields(
+        vec![
             "url".to_string(),
             "appKey".to_string(),
             "appSecret".to_string(),
             "userKey".to_string(),
             "userSecret".to_string()
-        )
+        ].select()
         .from("accounts".to_string())
-        .where_field("id".to_string())
+        .wher()
+        .field("id".to_string())
         .equals_param()
-        .and_field("thirdParty".to_string())
+        .and()
+        .field("thirdParty".to_string())
         .equals_param()
         .to_string()
     ).ok().and_then(
         | mut statement | {
             statement.bind(
                 1, 
-                config_id.account_id
+                config_id.account_id.to_string().as_str()
             ).unwrap();
             statement.bind(
                 2, 
-                config_id.third_party
+                config_id.third_party_id.to_string().as_str()
             ).unwrap();
             statement.next().ok().and_then(|_| 
                Some(Credentials {
