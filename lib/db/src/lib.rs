@@ -3,7 +3,7 @@
 ///
 /// Author: A.E.Veltstra
 /// Since: 2.19.501.900
-/// Version: 2.19.1027.751
+/// Version: 2.19.1206.1732
 ///
 
 //The 1 method in this module returns a Result.
@@ -15,10 +15,6 @@ extern crate sqlite;
 //contains an Sqlite Connection.
 //But in case of failure, we might get an Sqlite
 //Error, instead.
-
-// DotEnv lets us read configurations from
-// a local file.
-extern crate dotenv;
 
 /// Creates a connection to our data store.
 ///
@@ -34,7 +30,7 @@ extern crate dotenv;
 pub fn try_connect() -> Result<sqlite::Connection, sqlite::Error> {
 
     //fetch the database locator
-    let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL must be set. Create a file named '.env' at the root of the project folder. Add a line starting with 'DATABASE_URL', add an = sign, and then add the absolute path to the sqlite3 database file. No ~ path, no quotes, no spaces, no protocol, no substitutions.");
+    let database_url = "/root/dev/mambro/data/db.sqlite3";
 
     //attempt to create and return the db connection
     sqlite::open(&database_url)

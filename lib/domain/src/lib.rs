@@ -661,58 +661,130 @@ impl IMaybeEmpty for Account {
 /// 
 ///
 /// # Parameters
+///
 /// 1. SqliteConnection should supply access 
 ///    to the data store.
 /// 2. Account identifier as a string slice.
 ///    Should specify which account to find.
 /// 3. Third-party identifier as string slice.
 ///    Should specify 
+///
+///
+/// # Panics
+///
+/// Panics when the SQL statement parameters failed
+/// to bind to their values.
+///
+///
+/// # Examples 
+///
+/// ```rust
+/// use domain::fetch_account;
+/// assert!(
+///   db::try_connect().ok().and_then( | conn | 
+///     fetch_account(
+///       "hacoProduction",
+///       "Joor"
+///     )
+///   ).is_some()
+/// );
+/// ```
+///
 fn fetch_account(
     connection: &sqlite::Connection,
     account_id: &str,
     third_party: &str,
 ) -> Option<ConfigId> {
     use tsql_fluent::*;
-    match sqlite.execute(
-    let mut statement = connection.prepare(
-        select_c(1)
+    connection.prepare(
+        select_i(1)
         .from("accounts".to_string())
-        .where_start("id".to_string())
-        .equals()
-        .?()
-        .and("thirdParty".to_string())
-        .equals()
-        .?()
+        .where_field("id".to_string())
+        .equals_param()
+        .and_field("thirdParty".to_string())
+        .equals_param()
         .to_string()
-    ).unwrap();
-    statement.bind(1, account_id).unwrap();
-    statement.bind(2, third_party).unwrap();
-    while let State::Row = statement.next().unwrap() {
-        Ok(row) => {
-            Some(ConfigId::new(account_id, third_party));
+    ).ok().and_then(
+        | mut statement | {
+            statement.bind(1, account_id).unwrap();
+            statement.bind(2, third_party).unwrap();
+            statement.next().ok().and_then(|_| 
+                Some(ConfigId::new(
+                    account_id, 
+                    third_party
+                ))
+            )
         }
-        Err(e) => None
-    }
+    );
+    return None;
 }
 
-// Attempts to load from the data store those
-// Credentials that belong to the passed-in
-// ConfigId.
-//
-// If not found, returns None.
+/// Attempts to load from the data store those
+/// Credentials that belong to the passed-in
+/// ConfigId.
+///
+///
+/// # Parameters
+///
+/// 1. SqliteConnection should supply access 
+///    to the data store.
+/// 2. Configuration identifier should specify 
+///    which account to find at which thurd party.
+///
+///
+/// # Panics
+///
+/// Panics when the SQL parameters failed to 
+/// bind to their values.
+///
+/// If not found, returns None.
 fn fetch_credentials(
     connection: &sqlite::Connection,
     config_id: &ConfigId,
 ) -> Option<Credentials> {
-    if 1 == 2 {
-        None
-    } else {
-        Some(Credentials {
-            uri: URI::from(""),
-            app: Token::new("", ""),
-            user: Token::new("", ""),
-        })
-    }
+    use tsql_fluent::*;
+    connection.prepare(
+        select_fields(
+            "url".to_string(),
+            "appKey".to_string(),
+            "appSecret".to_string(),
+            "userKey".to_string(),
+            "userSecret".to_string()
+        )
+        .from("accounts".to_string())
+        .where_field("id".to_string())
+        .equals_param()
+        .and_field("thirdParty".to_string())
+        .equals_param()
+        .to_string()
+    ).ok().and_then(
+        | mut statement | {
+            statement.bind(
+                1, 
+                config_id.account_id
+            ).unwrap();
+            statement.bind(
+                2, 
+                config_id.third_party
+            ).unwrap();
+            statement.next().ok().and_then(|_| 
+               Some(Credentials {
+                    uri: URI::from(
+                        statement.read::<String>(0).ok()
+                    ),
+                    app: Token::new(
+                        statement.read::<String>(1).ok(),
+                        statement.read::<String>(2).ok()
+                    ),
+                    user: Token::new(
+                        statement.read::<String>(3).ok(),
+                        statement.read::<String>(4).ok()
+                    ),
+               })
+            )
+        }
+    );
+    return None;
 }
 
 // Attempts to load from the data store those
@@ -733,18 +805,22 @@ fn fetch_file_locations(
     }
 }
 
-// Attempts to load an Account with Credentials
-// and FileLocations that match the passed-in
-// id and third party.
+/// Attempts to load an Account with Credentials
+/// and FileLocations that match the passed-in
+/// id and third party.
 ///
-/// # Example
+/// # Examples
 ///
+/// ```rust
+/// use domain::attempt_load_account;
 /// let id = "Levi's";
 /// let third_party = "Macy's":
 /// match attempt_load_account(id, third_party) {
-///   Some(account): assert_true!(true),
-///   None: assert_true!(true)
+///   Some(account): assert!(true),
+///   None: assert!(true)
 /// }
+/// ```
+///
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
     match db::try_connect() {
         Ok(connection) => 

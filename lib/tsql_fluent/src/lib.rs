@@ -67,6 +67,10 @@ impl WrapInBrackets for String {
 
 const SELECT: &'static str = "select ";
 
+pub trait Select {
+  fn select(self) -> SqlBuilder;
+}
+
 /// Starts a new TSQL statement builder.
 ///
 /// # Examples
@@ -80,27 +84,52 @@ pub fn select() -> SqlBuilder {
     SqlBuilder { buffer: SELECT.to_owned(), }
 }
 
-/// Starts a data retrieval query with 
-/// instead of fields, selecting a static 
-/// amount, no matter how many rows are found.
-/// This is used in EXISTS sub statements, 
-/// and other places. 
-///
-/// # Examples
-///
-/// ```rust
-/// use tsql_fluent::*;
-/// let a = select_i(7);
-/// assert_eq!("select 7 ", a.as_str());
-/// ```
-///
-pub fn select_i(amount: i8) -> SqlBuilder {
+impl Select for i8 {
+  /// Starts a data retrieval query with 
+  /// instead of fields, selecting a static 
+  /// amount, no matter how many rows are found.
+  /// This is used in EXISTS sub statements, 
+  /// and other places. 
+  ///
+  /// # Examples
+  ///
+  /// ```rust
+  /// use tsql_fluent::*;
+  /// let a = 7.select();
+  /// assert_eq!("select 7 ", a.as_str());
+  /// ```
+  ///
+  fn select(self) -> SqlBuilder {
     let s = SELECT.to_owned();
-    let b = format!("{}{} ", s, amount);
+    let b = format!("{}{} ", s, &self);
     SqlBuilder { buffer: b, }
+  }
 }
 
+impl Select for String {
+  /// Starts a data retrieval query with 
+  /// a single field.
+  ///
+  /// # Examples
+  ///
+  /// ```rust
+  /// use tsql_fluent::*;
+  /// let a = "42".to_string().select();
+  /// assert_eq!("select [42] ", a.as_str());
+  /// ```
+  ///
+  fn select(self) -> SqlBuilder {
+    let s = SELECT.to_owned();
+    let b = format!(
+        "{}{} ", 
+        s, 
+        &self.wrap_in_brackets())
+    ;
+    SqlBuilder { buffer: b, }
+  }
+}
 
+impl Select for Vec<String> {
 /// Starts a new SQL statement builder with 
 /// a single field name. If you want to use 
 /// a name that requires escaping due to data 
@@ -115,17 +144,18 @@ pub fn select_i(amount: i8) -> SqlBuilder {
 /// let b = "b".to_string();
 /// let c = "c".to_string();
 /// let m = vec![a, b, c];
-/// let s = select_m(m);
+/// let s = m.select();
 /// assert_eq!(
 ///     s.as_str(), 
 ///     "select [a], [b], [c] "
 /// );
 /// ```
-pub fn select_m(m: Vec<String>) -> SqlBuilder {
+  fn select(self) -> SqlBuilder {
     let b = SELECT.to_owned();
-    let f = list_fields(m);
+    let f = wrap_and_list_fields(self);
     let c  = b + f.as_str();
     SqlBuilder { buffer: c, }
+  }
 }
 
 // Considers passed-in elements are db field names.
@@ -136,8 +166,8 @@ pub fn select_m(m: Vec<String>) -> SqlBuilder {
 // Vec<String>: a list of field names.
 //
 // This is a private function used in eg.
-// select_m/1 and top_x/2., 
-fn list_fields(m: Vec<String>) -> String {
+// select/1 and top_x/2., 
+fn wrap_and_list_fields(m: Vec<String>) -> String {
     let mut b = "".to_string();
     if let Some((last, more)) = m.split_last() {
         for f in more {
@@ -198,73 +228,34 @@ impl SqlBuilder {
     /// ```rust
     /// use tsql_fluent::*;
     /// let t = select()
-    ///             .distinct();
+    ///         .distinct();
     /// assert_eq!(
     ///     t.as_str(), 
     ///     "select distinct "
     /// );
     /// ```
     pub fn distinct (&self) -> Self {
-        let n = format!("{}{}", self.buffer, DISTINCT);
-        SqlBuilder { buffer: n }
+        let n = format!(
+            "{}{}", 
+            self.buffer, 
+            DISTINCT
+        );
+        SqlBuilder { buffer: n, }
     }
 
-    /// Add the DISTINCT clause with fields
-    /// to the existing statement.
-    /// This clause will make the DB attempt 
-    /// to remove any duplicate rows from 
-    /// the final query result prior to 
-    /// returning the result.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use tsql_fluent::*;
-    /// let a = "a".to_string();
-    /// let b = "b".to_string();
-    /// let c = "c".to_string();
-    /// let m = vec![a, b, c];
-    /// let s = select()
-    ///             .distinct_m(m);
-    /// assert_eq!(
-    ///     s.as_str(), 
-    ///     "select distinct [a], [b], [c] "
-    /// );
-    /// ```
-    pub fn distinct_m (&self, m: Vec<String>) -> Self {
-        let n = format!("{}{}", self.buffer, DISTINCT);
-        let f = list_fields(m);
-        let c  = n + f.as_str();
-        SqlBuilder { buffer: c, }
-    }
 
     /// Add the start of the TOP clause 
     /// to the existing statement.
     /// This clause lets you specify an 
     /// amount of rows to return. 
     ///
-    /// 
-    /// # Examples
-    /// 
-    /// ```rust
-    /// use tsql_fluent::*;
-    /// let t = select().top();
-    /// assert_eq!(t.to_string(), "select top ");
-    /// ```
-    ///
-    /// ```rust
-    /// use tsql_fluent::*;
-    /// let t = select()
-    ///     .top()
-    ///     .distinct();
-    /// assert_eq!(
-    ///     t.as_str(), 
-    ///     "select top distinct "
-    /// );
-    /// ```
-    pub fn top (&self) -> Self {
-        let n = format!("{}{}", self.buffer, TOP);
-        SqlBuilder { buffer: n }
+    fn top (&self) -> Self {
+        let n = format!(
+            "{}{}", 
+            self.buffer, 
+            TOP
+        );
+        SqlBuilder { buffer: n, }
     }
 
 
@@ -284,9 +275,13 @@ impl SqlBuilder {
     /// assert_eq!("select top 7 ", a.as_str());
     /// ```
     ///
-    pub fn top_i(&self, i: i64) -> SqlBuilder {
+    pub fn top_i(&self, i: i64) -> Self {
         let t = self.top().buffer;
-        let b = format!("{}{} ", t, i);
+        let b = format!(
+            "{}{} ", 
+            t, 
+            i
+        );
         SqlBuilder { buffer: b, }
     }
 
@@ -309,18 +304,22 @@ impl SqlBuilder {
     /// let c = "c".to_string();
     /// let m = vec![a, b, c];
     /// let t = select()
-    ///             .top_x(5, m);
+    ///         .top_i(5)
+    ///         .fields(m);
     /// assert_eq!(
     ///     t.as_str(), 
     ///     "select top 5 [a], [b], [c] "
     /// );
     /// ```
     ///
-    pub fn top_x (&self, x: i64, m: Vec<String>) -> Self {
-        let t = self.top().buffer;
-        let f = list_fields(m);
-        let t_x_m  = format!("{}{} {}", t, x, f.as_str());
-        SqlBuilder { buffer: t_x_m, }
+    pub fn fields (&self, m: Vec<String>) -> Self {
+        let f = wrap_and_list_fields(m);
+        let t_f  = format!(
+            "{}{}", 
+            self.buffer, 
+            f.as_str()
+        );
+        SqlBuilder { buffer: t_f, }
     }
 
     /// Adds the AS clause to the SQL statement.
@@ -338,7 +337,7 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = 1.select()
     ///     .from("card_holders".to_string())
     ///     .alias("grantees".to_string());
     /// assert_eq!(
@@ -347,9 +346,14 @@ impl SqlBuilder {
     /// );
     /// ```
     pub fn alias (&self, alias: String) -> Self {
-        let b = format!("{}{}{} ", self.buffer, ALIAS, alias.wrap_in_brackets());
+        let b = format!(
+            "{}{}{} ", 
+            self.buffer, 
+            ALIAS, 
+            alias.wrap_in_brackets()
+        );
         SqlBuilder { buffer: b, }
-}
+    }
 
     /// Adds the FROM clause to the SQL statement.
     /// This is used to indicate data storage
@@ -361,7 +365,7 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = 1.select()
     ///         .from("employees".to_string());
     /// assert_eq!(
     ///     "select 1 from [employees] ", 
@@ -369,7 +373,12 @@ impl SqlBuilder {
     /// );
     /// ```
     pub fn from (&self, store: String) -> Self {
-        let b = format!("{}{}{} ", self.buffer, FROM, store.wrap_in_brackets());
+        let b = format!(
+            "{}{}{} ", 
+            self.buffer, 
+            FROM, 
+            store.wrap_in_brackets())
+        ;
         SqlBuilder { buffer: b, }
     }
 
@@ -377,34 +386,66 @@ impl SqlBuilder {
     /// This is used to start specifying criteria
     /// that rows must meet in order to get
     /// included in the returned result.
+    ///   
+    /// This method is called "wher" instead of "where",
+    /// because the compiler is not smart enough to tell
+    /// apart keywords from functions.
     ///
-    /// This function is called 'where_start'
-    /// rather than the expected 'where', because 
-    /// the keyword 'where' is reserved in the 
-    /// rust programming language, and the rust 
-    /// compiler is not smart enought to see the 
-    /// difference.
     ///
     /// # Examples
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = 1.select()
     ///         .from("employees".to_string())
-    ///         .where_start("name".to_string());
+    ///         .wher()
+    ///         .field("name".to_string());
     /// assert_eq!(
     ///     "select 1 from [employees] where [name] ", 
     ///     f.as_str()
     /// );
     /// ```
-    pub fn where_start (&self, field: String) -> Self {
-        let b = format!("{}{}{} ", self.buffer, WHERE, field.wrap_in_brackets());
+    pub fn wher (&self) -> Self {
+        let b = format!(
+            "{}{}", 
+            self.buffer, 
+            WHERE
+        );
+        SqlBuilder { buffer: b, }
+    }
+
+
+    /// Adds a field (column) to the SQL statement.
+    /// This can be used to specify criteria
+    /// that rows must meet in order to get
+    /// included in the returned result.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use tsql_fluent::*;
+    /// let f = 1.select()
+    ///         .from("employees".to_string())
+    ///         .wher()
+    ///         .field("name".to_string());
+    /// assert_eq!(
+    ///     "select 1 from [employees] where [name] ", 
+    ///     f.as_str()
+    /// );
+    /// ```
+    pub fn field (&self, field: String) -> Self {
+        let b = format!(
+            "{}{} ", 
+            self.buffer, 
+            field.wrap_in_brackets()
+        );
         SqlBuilder { buffer: b, }
     }
 
 
     /// Adds the EQUALS clause to the SQL statement,
-    /// allowing to enter a parameter question mark
+    /// adding a parameter question mark
     /// that allows you to later add a value that 
     /// row columns must match in order to 
     /// get included in the returned result. You
@@ -415,17 +456,22 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = 1.select()
     ///         .from("authors".to_string())
-    ///         .where_start("book".to_string())
-    ///         .equals_q();
+    ///         .wher()
+    ///         .field("book".to_string())
+    ///         .equals_param();
     /// assert_eq!(
     ///     "select 1 from [authors] where [book] = ? ", 
     ///     f.as_str()
     /// );
     /// ```
-    pub fn equals_q (&self) -> Self {
-        let b = format!("{}{}? ", self.buffer, EQUALS);
+    pub fn equals_param (&self) -> Self {
+        let b = format!(
+            "{}{}? ", 
+            self.buffer, 
+            EQUALS
+        );
         SqlBuilder { buffer: b, }
     }
 
@@ -440,17 +486,23 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = "address".to_string()
+    ///         .select()
     ///         .from("employees".to_string())
-    ///         .where_start("name".to_string())
+    ///         .wher()
+    ///         .field("name".to_string())
     ///         .equals_value("'Pratchett'".to_string());
     /// assert_eq!(
-    ///     "select 1 from [employees] where [name] = 'Pratchett' ", 
+    ///     "select [address] from [employees] where [name] = 'Pratchett' ", 
     ///     f.as_str()
     /// );
     /// ```
     pub fn equals_value (&self, value: String) -> Self {
-        let b = format!("{}{}{} ", self.buffer, EQUALS, value);
+        let b = format!(
+            "{}{}{} ", 
+            self.buffer, 
+            EQUALS, 
+            value);
         SqlBuilder { buffer: b, }
     }
 
@@ -463,20 +515,27 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = "code".to_string()
+    ///         .select()
     ///         .from("employees".to_string())
     ///         .alias("workers".to_string())
-    ///         .where_start("name".to_string())
+    ///         .wher()
+    ///         .field("name".to_string())
     ///         .equals_value("'Pratchett'".to_string())
-    ///         .and("first".to_string())
+    ///         .and()
+    ///         .field("first".to_string())
     ///         .is_not_null();
     /// assert_eq!(
-    ///     "select 1 from [employees] as [workers] where [name] = 'Pratchett' and [first] is not null ", 
+    ///     "select [code] from [employees] as [workers] where [name] = 'Pratchett' and [first] is not null ", 
     ///     f.as_str()
     /// );
     /// ```
-    pub fn and (&self, field: String) -> Self {
-        let b = format!("{}{}{} ", self.buffer, AND, field.wrap_in_brackets());
+    pub fn and (&self) -> Self {
+        let b = format!(
+            "{}{}", 
+            self.buffer, 
+            AND
+            );
         SqlBuilder { buffer: b, }
     }
 
@@ -490,9 +549,10 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = 1.select()
     ///         .from("employees".to_string())
-    ///         .where_start("first".to_string())
+    ///         .wher()
+    ///         .field("first".to_string())
     ///         .is_null();
     /// assert_eq!(
     ///     "select 1 from [employees] where [first] is null ", 
@@ -500,7 +560,11 @@ impl SqlBuilder {
     /// );
     /// ```
     pub fn is_null (&self) -> Self {
-        let b = format!("{}{}", self.buffer, IS_NULL);
+        let b = format!(
+            "{}{}", 
+            self.buffer, 
+            IS_NULL
+        );
         SqlBuilder { buffer: b, }
     }
 
@@ -514,17 +578,24 @@ impl SqlBuilder {
     ///
     /// ```rust
     /// use tsql_fluent::*;
-    /// let f = select_i(1)
+    /// let f = select()
+    ///         .top_i(1)
+    ///         .field("name".to_string())
     ///         .from("employers".to_string())
-    ///         .where_start("benefits".to_string())
+    ///         .wher()
+    ///         .field("benefits".to_string())
     ///         .is_not_null();
     /// assert_eq!(
-    ///     "select 1 from [employers] where [benefits] is not null ", 
+    ///     "select top 1 [name] from [employers] where [benefits] is not null ", 
     ///     f.as_str()
     /// );
     /// ```
     pub fn is_not_null (&self) -> Self {
-        let b = format!("{}{}", self.buffer, IS_NOT_NULL);
+        let b = format!(
+            "{}{}", 
+            self.buffer, 
+            IS_NOT_NULL
+        );
         SqlBuilder { buffer: b, }
     }
 
