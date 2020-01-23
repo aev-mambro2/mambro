@@ -655,7 +655,9 @@ impl IMaybeEmpty for Credentials {
 /// use std::path::Path;
 /// let there = FileLocation {
 ///     purpose: FileLocationPurpose::from("inventoryRequests"),
-///     path: Path::new("/there/").join("that.kind")
+///     path: Path::new("/there/").join("that.kind"),
+///     forReading: 1,
+///     forWriting: 0
 /// };
 /// assert_eq!("inventoryRequests".to_string(), there.purpose.to_string());
 /// ```
@@ -663,6 +665,8 @@ impl IMaybeEmpty for Credentials {
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
     pub path: PathBuf,
+    pub forReading: bool,
+    pub forWriting: bool,
 }
 
 impl IMaybeEmpty for FileLocation {
@@ -671,12 +675,56 @@ impl IMaybeEmpty for FileLocation {
     }
 }
 
-impl From<&(&str, &str, &str)> for FileLocation {
-    fn from(that: &(&str, &str, &str)) -> Self {
-        let (how, folder, name) = that;
+impl From<&(&str, &str, &str, bool, bool)> for FileLocation {
+    fn from(that: &(&str, &str, &str, bool, bool)) -> Self {
+        let (how, folder, name, read, write) = that;
         FileLocation {
             purpose: FileLocationPurpose::from(*how),
             path: Path::new(*folder).join(*name),
+            forReading: *read,
+            forWriting: *write,
+        }
+    }
+}
+
+impl From<(Option<String>, 
+            Option<String>, 
+            Option<String>,
+            Option<i64>,
+            Option<i64>)> for FileLocation {
+    fn from(that:(Option<String>, 
+                    Option<String>,
+                    Option<String>,
+                    Option<i64>,
+                    Option<i64>
+        )) -> Self {
+        let (maybeHow, maybeFolder, maybeName, 
+             maybeRead, maybeWrite) = that;
+        let how = match maybeHow {
+            None => "",
+            Some(h) => &h,
+        };
+        let folder = match maybeFolder {
+            None => "",
+            Some(f) => &f,
+        };
+        let name = match maybeName {
+            None => "",
+            Some(n) => &n,
+        };
+        let read = match maybeRead {
+            None => false,
+            Some(r) => r != 0
+        };
+        let write = match maybeWrite {
+            None => false,
+            Some(w) => w != 0
+        };
+        FileLocation {
+            purpose: FileLocationPurpose::from(how),
+            path: Path::new(folder).join(name),
+            forReading: read,
+            forWriting: write,
         }
     }
 }
@@ -684,14 +732,6 @@ impl From<&(&str, &str, &str)> for FileLocation {
 impl FileLocation {
     pub fn extension(&self) -> Option<&OsStr> {
         self.path.extension()
-    }
-    pub fn from_all(them: &Vec<(&str, &str, &str)>) -> Vec<FileLocation> {
-        let mut buffer: Vec<FileLocation> = Vec::with_capacity(them.len());
-        for item in them {
-            buffer.push(FileLocation::from(item));
-        }
-        buffer.dedup();
-        buffer
     }
 }
 
@@ -859,27 +899,88 @@ fn fetch_credentials(
     return None;
 }
 
-// Attempts to load from the data store those
-// file locations that belong to the passed-in
-// ConfigId.
-//
-// If not found, returns None.
+/// Attempts to load from the data store those
+/// file locations that belong to the passed-in
+/// ConfigId.
+///
+/// If not found, returns None.
 fn fetch_file_locations(
     connection: &sqlite::Connection,
     config_id: &ConfigId,
 ) -> Vec<FileLocation> {
-    if 2 == 1 {
-        vec![]
-    } else {
-        FileLocation::from_all(&vec![
-         ("", "", "")
-        ])
-    }
+    use tsql_fluent::*;
+    connection.prepare(
+        vec![
+            "purpose".to_string(),
+            "folder".to_string(),
+            "fileName".to_string(),
+            "forReading".to_string(),
+            "forWriting".to_string()
+        ].select()
+        .from("fileLocations".to_string())
+        .wher()
+        .field("account".to_string())
+        .equals_param()
+        .and()
+        .field("thirdParty".to_string())
+        .equals_param()
+        .to_string()
+    ).ok().and_then(
+        | mut statement | {
+            statement.bind(
+                1, 
+                config_id.account_id
+                  .to_string().as_str()
+            ).unwrap();
+            statement.bind(
+                2, 
+                config_id.third_party_id
+                  .to_string().as_str()
+            ).unwrap();
+            let mut them: Vec<FileLocation> = Vec::new();
+            loop {
+              if statement.next().is_ok() {
+                  them.push(
+                    FileLocation::from(( 
+                        statement.read::<String>(0).ok(),
+                        statement.read::<String>(1).ok(),
+                        statement.read::<String>(2).ok(),
+                        statement.read::<i64>(3).ok(),
+                        statement.read::<i64>(4).ok()
+                    ))
+                  );
+              } else {
+                  break;
+              }
+            }
+            let immu = them;
+            return immu; 
+        }
+    );
+    return vec![];
 }
 
-/// Attempts to load an Account with Credentials
-/// and FileLocations that match the passed-in
-/// id and third party.
+/// Attempts to load an account's configuration, with 
+/// credentials and fileLocations, for that account 
+/// that matches the passed-in id and third party.
+///
+/// Returns None if all is well, and no known account
+/// matches the provided account id and third-party id.
+///
+///
+/// # Panics
+///
+/// Panics when the database connection could not be 
+/// established.
+///
+///
+/// # Parameters
+///
+/// 1. Account ID, &str: identifies the account for
+///    which to fetch additional configuration.
+/// 2. Third Party ID, &str: identifies which 
+///    remote service provided the account.
+///
 ///
 /// # Examples
 ///
@@ -894,16 +995,25 @@ fn fetch_file_locations(
 /// ```
 ///
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
-    match db::try_connect() {
-        Ok(connection) => 
-            match fetch_account(&connection, &id, &third_party) {
+    match db::try_connect() { Ok(connection) => 
+        match fetch_account(
+            &connection, 
+            &id, 
+            &third_party
+        ) {
+            None => None,
+            Some(config_id) => match fetch_credentials(
+                &connection, 
+                &config_id
+            ) {
                 None => None,
-                Some(config_id) => match fetch_credentials(&connection, &config_id) {
-                    None => None,
-                    Some(creds) => Some(Account {
-                        config_id: config_id.clone(),
-                        credentials: creds.clone(),
-                        locations: fetch_file_locations(&connection, &config_id),
+                Some(creds) => Some(Account {
+                    config_id: config_id.clone(),
+                    credentials: creds.clone(),
+                    locations: fetch_file_locations(
+                        &connection, 
+                        &config_id
+                    ),
                 }),
             },
         },
