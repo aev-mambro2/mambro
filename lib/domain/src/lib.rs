@@ -656,8 +656,8 @@ impl IMaybeEmpty for Credentials {
 /// let there = FileLocation {
 ///     purpose: FileLocationPurpose::from("inventoryRequests"),
 ///     path: Path::new("/there/").join("that.kind"),
-///     forReading: 1,
-///     forWriting: 0
+///     forReading: true,
+///     forWriting: false
 /// };
 /// assert_eq!("inventoryRequests".to_string(), there.purpose.to_string());
 /// ```
@@ -788,17 +788,35 @@ impl IMaybeEmpty for Account {
 ///
 /// ```rust
 /// use domain::fetch_account;
+/// use domain::ConfigId;
+/// use db::try_connect;
 /// assert!(
 ///   db::try_connect().ok().and_then( | conn | 
 ///     fetch_account(
+///       &conn,
 ///       "hacoProduction",
+///       "Joor"
+///     )
+///   ).is_none()
+/// );
+/// ```
+///
+/// ```rust
+/// use domain::fetch_account;
+/// use domain::ConfigId;
+/// use db::try_connect;
+/// assert!(
+///   db::try_connect().ok().and_then( | conn | 
+///     fetch_account(
+///       &conn,
+///       "HaCo",
 ///       "Joor"
 ///     )
 ///   ).is_some()
 /// );
 /// ```
 ///
-fn fetch_account(
+pub fn fetch_account(
     connection: &sqlite::Connection,
     account_id: &str,
     third_party: &str,
@@ -989,11 +1007,13 @@ fn fetch_file_locations(
 ///
 /// ```rust
 /// use domain::attempt_load_account;
+/// use domain::Account;
+/// use domain::IMaybeEmpty;
 /// let id = "Levi's";
-/// let third_party = "Macy's":
+/// let third_party = "Macy's";
 /// match attempt_load_account(id, third_party) {
-///   Some(account): assert!(true),
-///   None: assert!(true)
+///   Some(account) => assert!(!account.is_empty()),
+///   None => assert!(true)
 /// }
 /// ```
 ///
