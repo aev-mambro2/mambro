@@ -692,7 +692,7 @@ impl From<(Option<String>,
             Option<String>,
             Option<i64>,
             Option<i64>)> for FileLocation {
-    fn from(that:(Option<String>, 
+    fn from<'a>(that:(Option<String>, 
                     Option<String>,
                     Option<String>,
                     Option<i64>,
@@ -701,16 +701,16 @@ impl From<(Option<String>,
         let (maybeHow, maybeFolder, maybeName, 
              maybeRead, maybeWrite) = that;
         let how = match maybeHow {
-            None => "",
-            Some(h) => &h,
+            None => "".to_string(),
+            Some(h) => h,
         };
         let folder = match maybeFolder {
-            None => "",
-            Some(f) => &f,
+            None => "".to_string(),
+            Some(f) => f,
         };
         let name = match maybeName {
-            None => "",
-            Some(n) => &n,
+            None => "".to_string(),
+            Some(n) => n,
         };
         let read = match maybeRead {
             None => false,
@@ -722,7 +722,7 @@ impl From<(Option<String>,
         };
         FileLocation {
             purpose: FileLocationPurpose::from(how),
-            path: Path::new(folder).join(name),
+            path: Path::new(&folder).join(&name),
             forReading: read,
             forWriting: write,
         }
@@ -909,7 +909,7 @@ fn fetch_file_locations(
     config_id: &ConfigId,
 ) -> Vec<FileLocation> {
     use tsql_fluent::*;
-    connection.prepare(
+    let maybeVec = connection.prepare(
         vec![
             "purpose".to_string(),
             "folder".to_string(),
@@ -954,9 +954,12 @@ fn fetch_file_locations(
               }
             }
             let immu = them;
-            return immu; 
+            Some(immu)
         }
     );
+    if maybeVec.is_some() {
+        return maybeVec.unwrap();
+    }
     return vec![];
 }
 
