@@ -656,8 +656,8 @@ impl IMaybeEmpty for Credentials {
 /// let there = FileLocation {
 ///     purpose: FileLocationPurpose::from("inventoryRequests"),
 ///     path: Path::new("/there/").join("that.kind"),
-///     forReading: true,
-///     forWriting: false
+///     for_reading: true,
+///     for_writing: false
 /// };
 /// assert_eq!("inventoryRequests".to_string(), there.purpose.to_string());
 /// ```
@@ -665,8 +665,8 @@ impl IMaybeEmpty for Credentials {
 pub struct FileLocation {
     pub purpose: FileLocationPurpose,
     pub path: PathBuf,
-    pub forReading: bool,
-    pub forWriting: bool,
+    pub for_reading: bool,
+    pub for_writing: bool,
 }
 
 impl IMaybeEmpty for FileLocation {
@@ -681,8 +681,8 @@ impl From<&(&str, &str, &str, bool, bool)> for FileLocation {
         FileLocation {
             purpose: FileLocationPurpose::from(*how),
             path: Path::new(*folder).join(*name),
-            forReading: *read,
-            forWriting: *write,
+            for_reading: *read,
+            for_writing: *write,
         }
     }
 }
@@ -698,33 +698,33 @@ impl From<(Option<String>,
                     Option<i64>,
                     Option<i64>
         )) -> Self {
-        let (maybeHow, maybeFolder, maybeName, 
-             maybeRead, maybeWrite) = that;
-        let how = match maybeHow {
+        let (maybe_how, maybe_folder, maybe_name, 
+             maybe_read, maybe_write) = that;
+        let how = match maybe_how {
             None => "".to_string(),
             Some(h) => h,
         };
-        let folder = match maybeFolder {
+        let folder = match maybe_folder {
             None => "".to_string(),
             Some(f) => f,
         };
-        let name = match maybeName {
+        let name = match maybe_name {
             None => "".to_string(),
             Some(n) => n,
         };
-        let read = match maybeRead {
+        let read = match maybe_read {
             None => false,
             Some(r) => r != 0
         };
-        let write = match maybeWrite {
+        let write = match maybe_write {
             None => false,
             Some(w) => w != 0
         };
         FileLocation {
             purpose: FileLocationPurpose::from(how),
             path: Path::new(&folder).join(&name),
-            forReading: read,
-            forWriting: write,
+            for_reading: read,
+            for_writing: write,
         }
     }
 }
@@ -927,13 +927,13 @@ fn fetch_file_locations(
     config_id: &ConfigId,
 ) -> Vec<FileLocation> {
     use tsql_fluent::*;
-    let maybeVec = connection.prepare(
+    let maybe_vec = connection.prepare(
         vec![
             "purpose".to_string(),
             "folder".to_string(),
             "fileName".to_string(),
-            "forReading".to_string(),
-            "forWriting".to_string()
+            "for_reading".to_string(),
+            "for_writing".to_string()
         ].select()
         .from("fileLocations".to_string())
         .wher()
@@ -975,8 +975,8 @@ fn fetch_file_locations(
             Some(immu)
         }
     );
-    if maybeVec.is_some() {
-        return maybeVec.unwrap();
+    if maybe_vec.is_some() {
+        return maybe_vec.unwrap();
     }
     return vec![];
 }
