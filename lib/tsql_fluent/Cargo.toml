@@ -8,3 +8,4 @@ description = "Helps generate TSQL statements in a fluent manner, to limit code 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+db = { version = "0.2.0", path = "../db" }

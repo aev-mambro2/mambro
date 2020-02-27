@@ -1,30 +1,30 @@
-//! Domain contains data types that are used 
-//! in data integration applications that 
-//! connect local ERPs to remote channels, 
+//! Domain contains data types that are used
+//! in data integration applications that
+//! connect local ERPs to remote channels,
 //! a.k.a. third parties.
 //!
-//! Those often require account information 
-//! and credentials for authorizing 
+//! Those often require account information
+//! and credentials for authorizing
 //! communications.
 //!
-//! Each account tends to read the info it 
-//! needs to send from file locations that 
-//! are marked for a particular communication 
+//! Each account tends to read the info it
+//! needs to send from file locations that
+//! are marked for a particular communication
 //! purpose.
 //!
-//! When communications have completed, users 
-//! and managers expect some notification. 
-//! Thus, each account owns a list of email 
-//! addresses, each of which is marked for a 
-//! purpose, and sometimes exclusive to an 
+//! When communications have completed, users
+//! and managers expect some notification.
+//! Thus, each account owns a list of email
+//! addresses, each of which is marked for a
+//! purpose, and sometimes exclusive to an
 //! application.  
 //!
 //! Author: A.E.Veltstra  
 //! Since: 2.19.501.900  
-//! Version: 2.19.1028.1741
+//! Version: 2.20.226.1829
 
-//  Crate sqlite gives us low-level access to the 
-//  data store without getting in our way (like 
+//  Crate sqlite gives us low-level access to the
+//  data store without getting in our way (like
 //  diesel and other binding modules do).
 extern crate sqlite;
 
@@ -36,7 +36,7 @@ use secstr::*;
 /// Mambro db knows the layout of the
 /// data store.
 extern crate db;
-  
+
 /// Tsql_fluent helps build SQL statements.
 extern crate tsql_fluent;
 
@@ -88,7 +88,7 @@ impl From<&str> for AccountId {
     ///
     fn from(s: &str) -> Self {
         AccountId {
-            0: s.as_bytes().to_vec()
+            0: s.as_bytes().to_vec(),
         }
     }
 }
@@ -132,9 +132,9 @@ impl ToString for AccountId {
 #[derive(Clone, Debug, PartialEq)]
 pub struct FileLocationPurpose(Vec<u8>);
 
-// Documenting this is useless: 
+// Documenting this is useless:
 // it gets documented using standard text
-// yanked from elsewhere. 
+// yanked from elsewhere.
 impl PartialEq<&str> for FileLocationPurpose {
     fn eq(&self, s: &&str) -> bool {
         let other = FileLocationPurpose::from(*s);
@@ -149,14 +149,14 @@ impl From<&str> for FileLocationPurpose {
     /// # Arguments
     ///
     /// - &str: a name that identifies why a
-    ///         location is used. Should 
-    ///         match a purpose in the data 
-    ///         store. The name gets copied 
+    ///         location is used. Should
+    ///         match a purpose in the data
+    ///         store. The name gets copied
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
         FileLocationPurpose {
-            0: s.as_bytes().to_vec()
+            0: s.as_bytes().to_vec(),
         }
     }
 }
@@ -169,9 +169,9 @@ impl From<String> for FileLocationPurpose {
     /// # Arguments
     ///
     /// - String: a name that identifies why a
-    ///         location is used. Should 
-    ///         match a purpose in the data 
-    ///         store. The name gets copied 
+    ///         location is used. Should
+    ///         match a purpose in the data
+    ///         store. The name gets copied
     ///         and owned by the instance.
     ///
     fn from(s: String) -> Self {
@@ -213,13 +213,13 @@ impl From<&str> for ThirdPartyId {
     ///
     /// - &str: a name that identifies a
     ///         remote partner. Should match
-    ///         a third party in the data 
-    ///         store. The name gets copied 
+    ///         a third party in the data
+    ///         store. The name gets copied
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
         ThirdPartyId {
-           0: s.as_bytes().to_vec()
+            0: s.as_bytes().to_vec(),
         }
     }
 }
@@ -233,8 +233,8 @@ impl From<String> for ThirdPartyId {
     ///
     /// - String: a name that identifies a
     ///         remote partner. Should match
-    ///         a third party in the data 
-    ///         store. The name gets copied 
+    ///         a third party in the data
+    ///         store. The name gets copied
     ///         and owned by the instance.
     ///
     fn from(s: String) -> Self {
@@ -270,9 +270,7 @@ pub struct URI(Vec<u8>);
 
 impl URI {
     pub fn empty() -> Self {
-        URI {
-            0: vec![]
-        }
+        URI { 0: vec![] }
     }
 }
 
@@ -283,20 +281,20 @@ impl From<&str> for URI {
     ///
     /// # Arguments
     ///
-    /// - &str: a web address to use for 
-    ///         reaching out to the remote 
-    ///         partner's web / REST servers. 
-    ///         Suffix with / if the last 
-    ///         part is a TLD or a folder. 
+    /// - &str: a web address to use for
+    ///         reaching out to the remote
+    ///         partner's web / REST servers.
+    ///         Suffix with / if the last
+    ///         part is a TLD or a folder.
     ///         Omit the end / if the last
-    ///         part is a document or query 
+    ///         part is a document or query
     ///         value.
-    ///         The address gets copied 
+    ///         The address gets copied
     ///         and owned by the instance.
     ///
     fn from(s: &str) -> Self {
         URI {
-            0: s.as_bytes().to_vec()
+            0: s.as_bytes().to_vec(),
         }
     }
 }
@@ -308,17 +306,17 @@ impl From<String> for URI {
     ///
     /// # Arguments
     ///
-    /// - String: a web address to use for 
-    ///           reaching out to the remote 
-    ///           partner's web / REST servers. 
-    ///           Suffix with / if the last 
-    ///           part is a TLD or a folder. 
+    /// - String: a web address to use for
+    ///           reaching out to the remote
+    ///           partner's web / REST servers.
+    ///           Suffix with / if the last
+    ///           part is a TLD or a folder.
     ///           Omit the end / if the last
-    ///           part is a document or query 
+    ///           part is a document or query
     ///           value.
-    ///           The address gets copied 
+    ///           The address gets copied
     ///           and owned by the instance.
-    /// 
+    ///
     fn from(s: String) -> Self {
         URI::from(s.as_str())
     }
@@ -326,28 +324,28 @@ impl From<String> for URI {
 
 /// Convert from a standard Option that holds a String.
 impl From<Option<String>> for URI {
-    /// Converts from a standard Option that 
+    /// Converts from a standard Option that
     /// holds a String.
     ///
     ///
     /// # Arguments
     ///
     /// - Option<String>:  
-    ///         a web address to use for 
-    ///         reaching out to the remote 
-    ///         partner's web / REST servers. 
-    ///         Suffix with / if the last 
-    ///         part is a TLD or a folder. 
+    ///         a web address to use for
+    ///         reaching out to the remote
+    ///         partner's web / REST servers.
+    ///         Suffix with / if the last
+    ///         part is a TLD or a folder.
     ///         Omit the end / if the last
-    ///         part is a document or query 
+    ///         part is a document or query
     ///         value.
-    ///         The address gets copied 
+    ///         The address gets copied
     ///         and owned by the instance.
     ///
     fn from(s: Option<String>) -> Self {
         match s {
             None => URI::empty(),
-            Some(t) => URI::from(t.as_str())
+            Some(t) => URI::from(t.as_str()),
         }
     }
 }
@@ -436,7 +434,7 @@ pub trait New<R, S> {
 
 impl New<String, String> for ConfigId {
     fn new(a: String, b: String) -> Self {
-        ConfigId { 
+        ConfigId {
             account_id: AccountId::from(a),
             third_party_id: ThirdPartyId::from(b),
         }
@@ -445,14 +443,14 @@ impl New<String, String> for ConfigId {
 
 impl New<&str, &str> for ConfigId {
     fn new(a: &str, b: &str) -> Self {
-        ConfigId { 
+        ConfigId {
             account_id: AccountId::from(a),
             third_party_id: ThirdPartyId::from(b),
         }
     }
 }
 
-impl ToString for ConfigId  {
+impl ToString for ConfigId {
     fn to_string(&self) -> String {
         [self.account_id.to_string(), self.third_party_id.to_string()].join("@")
     }
@@ -479,11 +477,11 @@ impl ToString for ConfigId  {
 /// assert_eq!("***SECRET***:***SECRET***".to_string(), app1.to_string());
 /// ```
 ///
-/// # Example 
+/// # Example
 ///   
 /// Create 2 different tokens in differing ways.
-/// If their contents differs, then a trivial 
-/// comparison of their to_string() must think 
+/// If their contents differs, then a trivial
+/// comparison of their to_string() must think
 /// they are the same.
 ///
 /// ```
@@ -512,10 +510,10 @@ impl IMaybeEmpty for Token {
 
 impl New<&str, &str> for Token {
     /// Create from 2 common string slices.
-    /// Internally uses SecStr for holding 
-    /// each passed-in value. SecStr not 
+    /// Internally uses SecStr for holding
+    /// each passed-in value. SecStr not
     /// only masks the value when displaying,
-    /// it also destroys the value from 
+    /// it also destroys the value from
     /// memory after use.
     fn new(k: &str, s: &str) -> Self {
         Token {
@@ -527,32 +525,30 @@ impl New<&str, &str> for Token {
 
 impl New<Option<String>, Option<String>> for Token {
     /// Create from 2 standard Options holding a String.
-    /// Internally uses SecStr for holding 
-    /// each passed-in value. SecStr not 
+    /// Internally uses SecStr for holding
+    /// each passed-in value. SecStr not
     /// only masks the value when displaying,
-    /// it also destroys the value from 
+    /// it also destroys the value from
     /// memory after use.
     fn new(k: Option<String>, s: Option<String>) -> Self {
         match k {
             None => Token::empty(),
             Some(k2) => match s {
                 None => Token::empty(),
-                Some(s2) => 
-                    Token {
-                        key: SecUtf8::from(k2.as_bytes()),
-                        secret: SecUtf8::from(s2.as_bytes()),
-                    }
-            }
+                Some(s2) => Token {
+                    key: SecUtf8::from(k2.as_bytes()),
+                    secret: SecUtf8::from(s2.as_bytes()),
+                },
+            },
         }
     }
 }
 
-
 // Use this method to generate a trivial copy of
-// the values in this token. The values will not 
-// be revealed. Instead they are substituted by 
+// the values in this token. The values will not
+// be revealed. Instead they are substituted by
 // a constant expression '***SECRET***'.
-// This is done to prevent accidental reveals 
+// This is done to prevent accidental reveals
 // via (for instance) debug, display, or format.
 // To generate a revealing copy, use unsecure_to_string().
 impl ToString for Token {
@@ -578,10 +574,10 @@ impl ToString for Token {
 /// assert_eq!("qwerty:7#6$5".to_string(), app1.unsecure_to_string());
 /// ```
 ///
-/// # Example 
+/// # Example
 ///   
-/// Create 2 tokens in differing ways, and 
-/// if their contents is different, then they are 
+/// Create 2 tokens in differing ways, and
+/// if their contents is different, then they are
 /// different.
 ///
 /// ```
@@ -598,13 +594,17 @@ impl ToString for Token {
 /// ```
 impl Token {
     pub fn unsecure_to_string(&self) -> String {
-        [self.key.unsecure().to_string(), self.secret.unsecure().to_string()].join(":")
+        [
+            self.key.unsecure().to_string(),
+            self.secret.unsecure().to_string(),
+        ]
+        .join(":")
     }
     pub fn empty() -> Token {
-      Token {
-        key: SecUtf8::from(""),
-        secret: SecUtf8::from(""),
-      }
+        Token {
+            key: SecUtf8::from(""),
+            secret: SecUtf8::from(""),
+        }
     }
 }
 
@@ -687,19 +687,25 @@ impl From<&(&str, &str, &str, bool, bool)> for FileLocation {
     }
 }
 
-impl From<(Option<String>, 
-            Option<String>, 
+impl
+    From<(
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<i64>,
+        Option<i64>,
+    )> for FileLocation
+{
+    fn from<'a>(
+        that: (
+            Option<String>,
+            Option<String>,
             Option<String>,
             Option<i64>,
-            Option<i64>)> for FileLocation {
-    fn from<'a>(that:(Option<String>, 
-                    Option<String>,
-                    Option<String>,
-                    Option<i64>,
-                    Option<i64>
-        )) -> Self {
-        let (maybe_how, maybe_folder, maybe_name, 
-             maybe_read, maybe_write) = that;
+            Option<i64>,
+        ),
+    ) -> Self {
+        let (maybe_how, maybe_folder, maybe_name, maybe_read, maybe_write) = that;
         let how = match maybe_how {
             None => "".to_string(),
             Some(h) => h,
@@ -714,11 +720,11 @@ impl From<(Option<String>,
         };
         let read = match maybe_read {
             None => false,
-            Some(r) => r != 0
+            Some(r) => r != 0,
         };
         let write = match maybe_write {
             None => false,
-            Some(w) => w != 0
+            Some(w) => w != 0,
         };
         FileLocation {
             purpose: FileLocationPurpose::from(how),
@@ -735,7 +741,7 @@ impl FileLocation {
     }
 }
 
-// Let's ensure that we can make paths in a 
+// Let's ensure that we can make paths in a
 // language-safe way.
 pub trait ToPath {
     fn to_path(&self) -> &Path;
@@ -766,16 +772,16 @@ impl IMaybeEmpty for Account {
 /// account id and third party id.
 ///
 /// If not found, returns None.
-/// 
+///
 ///
 /// # Parameters
 ///
-/// 1. SqliteConnection should supply access 
+/// 1. SqliteConnection should supply access
 ///    to the data store.
 /// 2. Account identifier as a string slice.
 ///    Should specify which account to find.
 /// 3. Third-party identifier as string slice.
-///    Should specify 
+///    Should specify
 ///
 ///
 /// # Panics
@@ -784,14 +790,14 @@ impl IMaybeEmpty for Account {
 /// to bind to their values.
 ///
 ///
-/// # Examples 
+/// # Examples
 ///
 /// ```rust
 /// use domain::fetch_account;
 /// use domain::ConfigId;
 /// use db::try_connect;
 /// assert!(
-///   db::try_connect().ok().and_then( | conn | 
+///   db::try_connect().ok().and_then( | conn |
 ///     fetch_account(
 ///       &conn,
 ///       "hacoProduction",
@@ -806,7 +812,7 @@ impl IMaybeEmpty for Account {
 /// use domain::ConfigId;
 /// use db::try_connect;
 /// assert!(
-///   db::try_connect().ok().and_then( | conn | 
+///   db::try_connect().ok().and_then( | conn |
 ///     fetch_account(
 ///       &conn,
 ///       "HaCo",
@@ -822,29 +828,28 @@ pub fn fetch_account(
     third_party: &str,
 ) -> Option<ConfigId> {
     use tsql_fluent::*;
-    connection.prepare(
-        1.select()
-        .from("accounts".to_string())
-        .wher()
-        .field("id".to_string())
-        .equals_param()
-        .and()
-        .field("thirdParty".to_string())
-        .equals_param()
-        .to_string()
-    ).ok().and_then(
-        | mut statement | {
+    connection
+        .prepare(
+            1.select()
+                .from("accounts".to_string())
+                .wher()
+                .field("id".to_string())
+                .equals_param()
+                .and()
+                .field("thirdParty".to_string())
+                .equals_param()
+                .to_string(),
+        )
+        .ok()
+        .and_then(|mut statement| {
             statement.bind(1, account_id).unwrap();
             statement.bind(2, third_party).unwrap();
-            statement.next().ok().and_then(|_| 
-                Some(ConfigId::new(
-                    account_id, 
-                    third_party
-                ))
-            )
-        }
-    );
-    return None;
+            statement
+                .next()
+                .ok()
+                .map(|_| ConfigId::new(account_id, third_party))
+        });
+    None
 }
 
 /// Attempts to load from the data store those
@@ -854,67 +859,60 @@ pub fn fetch_account(
 ///
 /// # Parameters
 ///
-/// 1. SqliteConnection should supply access 
+/// 1. SqliteConnection should supply access
 ///    to the data store.
-/// 2. Configuration identifier should specify 
+/// 2. Configuration identifier should specify
 ///    which account to find at which thurd party.
 ///
 ///
 /// # Panics
 ///
-/// Panics when the SQL parameters failed to 
+/// Panics when the SQL parameters failed to
 /// bind to their values.
 ///
 /// If not found, returns None.
-fn fetch_credentials(
-    connection: &sqlite::Connection,
-    config_id: &ConfigId,
-) -> Option<Credentials> {
+fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> Option<Credentials> {
     use tsql_fluent::*;
-    connection.prepare(
-        vec![
-            "url".to_string(),
-            "appKey".to_string(),
-            "appSecret".to_string(),
-            "userKey".to_string(),
-            "userSecret".to_string()
-        ].select()
-        .from("accounts".to_string())
-        .wher()
-        .field("id".to_string())
-        .equals_param()
-        .and()
-        .field("thirdParty".to_string())
-        .equals_param()
-        .to_string()
-    ).ok().and_then(
-        | mut statement | {
-            statement.bind(
-                1, 
-                config_id.account_id.to_string().as_str()
-            ).unwrap();
-            statement.bind(
-                2, 
-                config_id.third_party_id.to_string().as_str()
-            ).unwrap();
-            statement.next().ok().and_then(|_| 
-               Some(Credentials {
-                    uri: URI::from(
-                        statement.read::<String>(0).ok()
-                    ),
+    connection
+        .prepare(
+            vec![
+                "url".to_string(),
+                "appKey".to_string(),
+                "appSecret".to_string(),
+                "userKey".to_string(),
+                "userSecret".to_string(),
+            ]
+            .select()
+            .from("accounts".to_string())
+            .wher()
+            .field("id".to_string())
+            .equals_param()
+            .and()
+            .field("thirdParty".to_string())
+            .equals_param()
+            .to_string(),
+        )
+        .ok()
+        .and_then(|mut statement| {
+            statement
+                .bind(1, config_id.account_id.to_string().as_str())
+                .unwrap();
+            statement
+                .bind(2, config_id.third_party_id.to_string().as_str())
+                .unwrap();
+            statement.next().ok().map(|_| Credentials {
+                    uri: URI::from(statement.read::<String>(0).ok()),
                     app: Token::new(
                         statement.read::<String>(1).ok(),
-                        statement.read::<String>(2).ok()
+                        statement.read::<String>(2).ok(),
                     ),
                     user: Token::new(
                         statement.read::<String>(3).ok(),
-                        statement.read::<String>(4).ok()
+                        statement.read::<String>(4).ok(),
                     ),
-               })
-            )
-        }
-    );
-    return None;
+            })
+        });
+    None
 }
 
 /// Attempts to load from the data store those
@@ -927,62 +925,58 @@ fn fetch_file_locations(
     config_id: &ConfigId,
 ) -> Vec<FileLocation> {
     use tsql_fluent::*;
-    let maybe_vec = connection.prepare(
-        vec![
-            "purpose".to_string(),
-            "folder".to_string(),
-            "fileName".to_string(),
-            "for_reading".to_string(),
-            "for_writing".to_string()
-        ].select()
-        .from("fileLocations".to_string())
-        .wher()
-        .field("account".to_string())
-        .equals_param()
-        .and()
-        .field("thirdParty".to_string())
-        .equals_param()
-        .to_string()
-    ).ok().and_then(
-        | mut statement | {
-            statement.bind(
-                1, 
-                config_id.account_id
-                  .to_string().as_str()
-            ).unwrap();
-            statement.bind(
-                2, 
-                config_id.third_party_id
-                  .to_string().as_str()
-            ).unwrap();
+    let maybe_vec = connection
+        .prepare(
+            vec![
+                "purpose".to_string(),
+                "folder".to_string(),
+                "fileName".to_string(),
+                "for_reading".to_string(),
+                "for_writing".to_string(),
+            ]
+            .select()
+            .from("fileLocations".to_string())
+            .wher()
+            .field("account".to_string())
+            .equals_param()
+            .and()
+            .field("thirdParty".to_string())
+            .equals_param()
+            .to_string(),
+        )
+        .ok()
+        .and_then(|mut statement| {
+            statement
+                .bind(1, config_id.account_id.to_string().as_str())
+                .unwrap();
+            statement
+                .bind(2, config_id.third_party_id.to_string().as_str())
+                .unwrap();
             let mut them: Vec<FileLocation> = Vec::new();
             loop {
-              if statement.next().is_ok() {
-                  them.push(
-                    FileLocation::from(( 
+                if statement.next().is_ok() {
+                    them.push(FileLocation::from((
                         statement.read::<String>(0).ok(),
                         statement.read::<String>(1).ok(),
                         statement.read::<String>(2).ok(),
                         statement.read::<i64>(3).ok(),
-                        statement.read::<i64>(4).ok()
-                    ))
-                  );
-              } else {
-                  break;
-              }
+                        statement.read::<i64>(4).ok(),
+                    )));
+                } else {
+                    break;
+                }
             }
             let immu = them;
             Some(immu)
-        }
-    );
+        });
     if maybe_vec.is_some() {
         return maybe_vec.unwrap();
     }
     return vec![];
 }
 
-/// Attempts to load an account's configuration, with 
-/// credentials and fileLocations, for that account 
+/// Attempts to load an account's configuration, with
+/// credentials and fileLocations, for that account
 /// that matches the passed-in id and third party.
 ///
 /// Returns None if all is well, and no known account
@@ -991,7 +985,7 @@ fn fetch_file_locations(
 ///
 /// # Panics
 ///
-/// Panics when the database connection could not be 
+/// Panics when the database connection could not be
 /// established.
 ///
 ///
@@ -999,7 +993,7 @@ fn fetch_file_locations(
 ///
 /// 1. Account ID, &str: identifies the account for
 ///    which to fetch additional configuration.
-/// 2. Third Party ID, &str: identifies which 
+/// 2. Third Party ID, &str: identifies which
 ///    remote service provided the account.
 ///
 ///
@@ -1018,30 +1012,20 @@ fn fetch_file_locations(
 /// ```
 ///
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
-    match db::try_connect() { Ok(connection) => 
-        match fetch_account(
-            &connection, 
-            &id, 
-            &third_party
-        ) {
+    match db::try_connect() {
+        Ok(connection) => match fetch_account(&connection, &id, &third_party) {
             None => None,
-            Some(config_id) => match fetch_credentials(
-                &connection, 
-                &config_id
-            ) {
+            Some(config_id) => match fetch_credentials(&connection, &config_id) {
                 None => None,
                 Some(creds) => Some(Account {
                     config_id: config_id.clone(),
-                    credentials: creds.clone(),
-                    locations: fetch_file_locations(
-                        &connection, 
-                        &config_id
-                    ),
+                    credentials: creds,
+                    locations: fetch_file_locations(&connection, &config_id),
                 }),
             },
         },
-        Err(e) => { 
-            let msg = format!("Error connecting to db. Additional error message: {}.", &e).to_owned();
+        Err(e) => {
+            let msg = format!("Error connecting to db. Additional error message: {}.", &e);
             panic!(msg);
         }
     }

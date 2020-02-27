@@ -3,9 +3,8 @@
 ///
 /// Author: A.E.Veltstra
 /// Since: 2.19.501.900
-/// Version: 2.19.1206.1732
+/// Version: 2.20.226.1945
 ///
-
 //The 1 method in this module returns a Result.
 use Result;
 
@@ -25,12 +24,11 @@ extern crate sqlite;
 ///
 /// let maybe_connection = db::try_connect();
 /// assert!(maybe_connection.is_ok());
-/// 
+///
 /// ```
 pub fn try_connect() -> Result<sqlite::Connection, sqlite::Error> {
-
     //fetch the database locator
-    let database_url = "/root/dev/mambro/data/db.sqlite3";
+    let database_url = "/home/dave/dev/mambro/data/db.sqlite3";
 
     //attempt to create and return the db connection
     sqlite::open(&database_url)
