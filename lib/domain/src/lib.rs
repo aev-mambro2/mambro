@@ -768,7 +768,7 @@ impl IMaybeEmpty for Account {
 }
 
 /// Attempts to check that any ConfigId in the
-/// data store matches the passed-in account id 
+/// data store matches the passed-in account id
 /// and third party id.
 ///
 /// If found, returns the ConfigId. Otherwise None.
@@ -794,8 +794,8 @@ pub fn check_config_id(
     account_id: &str,
     third_party: &str,
 ) -> Option<ConfigId> {
-    use tsql_fluent::*;
     use sqlite::State::*;
+    use tsql_fluent::*;
     let mut statement = connection
         .prepare(
             1.select()
@@ -816,9 +816,9 @@ pub fn check_config_id(
     //unnamed column with the number 1.
     match statement.next() {
         Ok(state) => match state {
-                Row => Some(ConfigId::new(account_id, third_party)),
-                Done => None,
-            },
+            Row => Some(ConfigId::new(account_id, third_party)),
+            Done => None,
+        },
         Err(_) => None,
     }
 }
@@ -862,9 +862,14 @@ fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> O
             .field("thirdParty".to_string())
             .equals_param()
             .to_string(),
-        ).unwrap();
-    statement.bind(1, config_id.account_id.to_string().as_str()).unwrap();
-    statement.bind(2, config_id.third_party_id.to_string().as_str()).unwrap();
+        )
+        .unwrap();
+    statement
+        .bind(1, config_id.account_id.to_string().as_str())
+        .unwrap();
+    statement
+        .bind(2, config_id.third_party_id.to_string().as_str())
+        .unwrap();
     match statement.next() {
         Ok(state) => match state {
             sqlite::State::Row => Some(Credentials {
@@ -877,8 +882,8 @@ fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> O
                     statement.read::<String>(3).ok(),
                     statement.read::<String>(4).ok(),
                 ),
-              }),
-            sqlite::State::Done => None
+            }),
+            sqlite::State::Done => None,
         },
         Err(e) => None,
     }
@@ -894,14 +899,14 @@ fn fetch_file_locations(
     config_id: &ConfigId,
 ) -> Vec<FileLocation> {
     use tsql_fluent::*;
-    let maybe_vec = connection
+    let mut statement = connection
         .prepare(
             vec![
                 "purpose".to_string(),
                 "folder".to_string(),
                 "fileName".to_string(),
-                "for_reading".to_string(),
-                "for_writing".to_string(),
+                "forReading".to_string(),
+                "forWriting".to_string(),
             ]
             .select()
             .from("fileLocations".to_string())
@@ -913,35 +918,24 @@ fn fetch_file_locations(
             .equals_param()
             .to_string(),
         )
-        .ok()
-        .and_then(|mut statement| {
-            statement
-                .bind(1, config_id.account_id.to_string().as_str())
-                .unwrap();
-            statement
-                .bind(2, config_id.third_party_id.to_string().as_str())
-                .unwrap();
-            let mut them: Vec<FileLocation> = Vec::new();
-            loop {
-                if statement.next().is_ok() {
-                    them.push(FileLocation::from((
-                        statement.read::<String>(0).ok(),
-                        statement.read::<String>(1).ok(),
-                        statement.read::<String>(2).ok(),
-                        statement.read::<i64>(3).ok(),
-                        statement.read::<i64>(4).ok(),
-                    )));
-                } else {
-                    break;
-                }
-            }
-            let immu = them;
-            Some(immu)
-        });
-    if maybe_vec.is_some() {
-        return maybe_vec.unwrap();
+        .unwrap();
+    statement
+        .bind(1, config_id.account_id.to_string().as_str())
+        .unwrap();
+    statement
+        .bind(2, config_id.third_party_id.to_string().as_str())
+        .unwrap();
+    let mut them: Vec<FileLocation> = Vec::new();
+    while let sqlite::State::Row = statement.next().unwrap() {
+        them.push(FileLocation::from((
+            statement.read::<String>(0).ok(),
+            statement.read::<String>(1).ok(),
+            statement.read::<String>(2).ok(),
+            statement.read::<i64>(3).ok(),
+            statement.read::<i64>(4).ok(),
+        )));
     }
-    return vec![];
+    them
 }
 
 /// Attempts to load an account's configuration, with
