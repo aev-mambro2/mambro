@@ -21,7 +21,7 @@
 //!
 //! Author: A.E.Veltstra  
 //! Since: 2.19.501.900  
-//! Version: 2.20.226.1829
+//! Version: 2.20.228.2227
 
 //  Crate sqlite gives us low-level access to the
 //  data store without getting in our way (like
@@ -767,11 +767,11 @@ impl IMaybeEmpty for Account {
     }
 }
 
-/// Attempts to fetch that ConfigId from the
-/// data store which matches the passed-in
-/// account id and third party id.
+/// Attempts to check that any ConfigId in the
+/// data store matches the passed-in account id 
+/// and third party id.
 ///
-/// If not found, returns None.
+/// If found, returns the ConfigId. Otherwise None.
 ///
 ///
 /// # Parameters
@@ -789,7 +789,7 @@ impl IMaybeEmpty for Account {
 /// Panics when the SQL statement parameters failed
 /// to bind to their values.
 ///
-pub fn fetch_account(
+pub fn check_config_id(
     connection: &sqlite::Connection,
     account_id: &str,
     third_party: &str,
@@ -844,34 +844,30 @@ pub fn fetch_account(
 /// If not found, returns None.
 fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> Option<Credentials> {
     use tsql_fluent::*;
-    connection
+    let mut statement = connection
         .prepare(
             vec![
-                "url".to_string(),
-                "appKey".to_string(),
-                "appSecret".to_string(),
-                "userKey".to_string(),
-                "userSecret".to_string(),
+                "uri".to_string(),
+                "app_key".to_string(),
+                "app_secret".to_string(),
+                "user_key".to_string(),
+                "user_secret".to_string(),
             ]
             .select()
-            .from("accounts".to_string())
+            .from("credentials".to_string())
             .wher()
-            .field("id".to_string())
+            .field("account".to_string())
             .equals_param()
             .and()
             .field("thirdParty".to_string())
             .equals_param()
             .to_string(),
-        )
-        .ok()
-        .and_then(|mut statement| {
-            statement
-                .bind(1, config_id.account_id.to_string().as_str())
-                .unwrap();
-            statement
-                .bind(2, config_id.third_party_id.to_string().as_str())
-                .unwrap();
-            statement.next().ok().map(|_| Credentials {
+        ).unwrap();
+    statement.bind(1, config_id.account_id.to_string().as_str()).unwrap();
+    statement.bind(2, config_id.third_party_id.to_string().as_str()).unwrap();
+    match statement.next() {
+        Ok(state) => match state {
+            sqlite::State::Row => Some(Credentials {
                 uri: URI::from(statement.read::<String>(0).ok()),
                 app: Token::new(
                     statement.read::<String>(1).ok(),
@@ -881,9 +877,11 @@ fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> O
                     statement.read::<String>(3).ok(),
                     statement.read::<String>(4).ok(),
                 ),
-            })
-        });
-    None
+              }),
+            sqlite::State::Done => None
+        },
+        Err(e) => None,
+    }
 }
 
 /// Attempts to load from the data store those
@@ -984,7 +982,7 @@ fn fetch_file_locations(
 ///
 pub fn attempt_load_account(id: &str, third_party: &str) -> Option<Account> {
     match db::try_connect() {
-        Ok(connection) => match fetch_account(&connection, &id, &third_party) {
+        Ok(connection) => match check_config_id(&connection, &id, &third_party) {
             None => None,
             Some(config_id) => match fetch_credentials(&connection, &config_id) {
                 None => None,
