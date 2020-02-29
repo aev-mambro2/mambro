@@ -789,46 +789,14 @@ impl IMaybeEmpty for Account {
 /// Panics when the SQL statement parameters failed
 /// to bind to their values.
 ///
-///
-/// # Examples
-///
-/// ```rust
-/// use domain::fetch_account;
-/// use domain::ConfigId;
-/// use db::try_connect;
-/// assert!(
-///   db::try_connect().ok().and_then( | conn |
-///     fetch_account(
-///       &conn,
-///       "hacoProduction",
-///       "Joor"
-///     )
-///   ).is_none()
-/// );
-/// ```
-///
-/// ```rust
-/// use domain::fetch_account;
-/// use domain::ConfigId;
-/// use db::try_connect;
-/// assert!(
-///   db::try_connect().ok().and_then( | conn |
-///     fetch_account(
-///       &conn,
-///       "HaCo",
-///       "Joor"
-///     )
-///   ).is_some()
-/// );
-/// ```
-///
 pub fn fetch_account(
     connection: &sqlite::Connection,
     account_id: &str,
     third_party: &str,
 ) -> Option<ConfigId> {
     use tsql_fluent::*;
-    connection
+    use sqlite::State::*;
+    let mut statement = connection
         .prepare(
             1.select()
                 .from("accounts".to_string())
@@ -840,16 +808,19 @@ pub fn fetch_account(
                 .equals_param()
                 .to_string(),
         )
-        .ok()
-        .and_then(|mut statement| {
-            statement.bind(1, account_id).unwrap();
-            statement.bind(2, third_party).unwrap();
-            statement
-                .next()
-                .ok()
-                .map(|_| ConfigId::new(account_id, third_party))
-        });
-    None
+        .unwrap();
+    statement.bind(1, account_id).unwrap();
+    statement.bind(2, third_party).unwrap();
+    //There should be only 1 row at most,
+    //and if that exists it should contain an
+    //unnamed column with the number 1.
+    match statement.next() {
+        Ok(state) => match state {
+                Row => Some(ConfigId::new(account_id, third_party)),
+                Done => None,
+            },
+        Err(_) => None,
+    }
 }
 
 /// Attempts to load from the data store those
@@ -901,15 +872,15 @@ fn fetch_credentials(connection: &sqlite::Connection, config_id: &ConfigId) -> O
                 .bind(2, config_id.third_party_id.to_string().as_str())
                 .unwrap();
             statement.next().ok().map(|_| Credentials {
-                    uri: URI::from(statement.read::<String>(0).ok()),
-                    app: Token::new(
-                        statement.read::<String>(1).ok(),
-                        statement.read::<String>(2).ok(),
-                    ),
-                    user: Token::new(
-                        statement.read::<String>(3).ok(),
-                        statement.read::<String>(4).ok(),
-                    ),
+                uri: URI::from(statement.read::<String>(0).ok()),
+                app: Token::new(
+                    statement.read::<String>(1).ok(),
+                    statement.read::<String>(2).ok(),
+                ),
+                user: Token::new(
+                    statement.read::<String>(3).ok(),
+                    statement.read::<String>(4).ok(),
+                ),
             })
         });
     None
