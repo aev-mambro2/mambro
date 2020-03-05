@@ -1,16 +1,11 @@
-// For compiling and debugging diesel,
-// we are required to increase the
-// recursion limit.
-#![recursion_limit = "128"]
-
-/// Downloads new orders from Joor for
-/// accounts like Habitual Denim.
-/// For installation instructions, refer to
-/// installing.md.
-///
-/// Author: A.E. Veltstra
-/// Since: 2.19.501.900
-/// Version: 2.19.920.2140
+//! Downloads new orders from Joor for
+//! accounts like Habitual Denim.
+//! For installation instructions, refer to
+//! installing.md.
+//!
+//! Author: A.E. Veltstra
+//! Since: 2.19.501.900
+//! Version: 2.20.305.907
 
 // Domain holds semantically significant
 // data structures and maps them to
@@ -29,9 +24,15 @@ mod tests {
         let p = "orders";
         let f = "/usr/dave/orders";
         let n = "order-{id}-dd-{dt}.xml";
-        let fl = domain::FileLocation::new(p, f, n);
+        let fl = domain::FileLocation::from(&(
+          p,
+          f, 
+          n,
+          true,
+          false
+        ));
         // We can't compare path against &str (yet).
-        assert_eq!(fl.to_path(), Path::new(f).join(n));
+        assert_eq!(fl.path, Path::new(f).join(n));
     }
 
     /// The function find_account_id must find
@@ -93,16 +94,16 @@ use std::time::SystemTime;
 ///
 /// ```rust
 /// # fn main() {
-/// # use crate::orders::*;
-/// let mut args: Vec<String> = Vec::new();
-/// args.push(String::from("nothing"));
-/// args.push(String::from("nothing"));
-/// args.push(String::from("--account"));
-/// args.push(String::from("HaCoSandbox"));
-/// args.push(String::from("nothing"));
-/// let found = orders::find_account_id(&args);
-/// assert_eq!(true, found.is_some());
-/// assert_eq!(Some("HaCoSandbox"), found);
+///   # use crate::orders::*;
+///   let mut args: Vec<String> = Vec::new();
+///   args.push(String::from("nothing"));
+///   args.push(String::from("nothing"));
+///   args.push(String::from("--account"));
+///   args.push(String::from("HaCoSandbox"));
+///   args.push(String::from("nothing"));
+///   let found = orders::find_account_id(&args);
+///   assert_eq!(true, found.is_some());
+///   assert_eq!(Some("HaCoSandbox"), found);
 /// # }
 /// ```
 fn find_account_id(args: &[String]) -> Option<&str> {
@@ -232,7 +233,7 @@ fn main() {
             );
             let mut iter = account.locations.iter();
             while let Some(loc) = iter.next() {
-                println!("- {}: {}", loc.purpose, loc.to_path().display())
+                println!("- {:?}: {}", loc.purpose, loc.path.display())
             }
             let o = "orders";
             match account.locations.iter().find(|&it| it.purpose.eq(&o)) {
@@ -245,7 +246,7 @@ fn main() {
                     "Location for purpose {} for account {:?}: {:?}.",
                     o,
                     account.config_id.to_string(),
-                    there.to_path()
+                    there.path
                 ),
             }
         }

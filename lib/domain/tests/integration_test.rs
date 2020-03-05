@@ -18,8 +18,7 @@ pub fn test_fetch_known_config_id() {
     let maybe_config_id = check_config_id(&connection, "HaCo", "Joor");
     match maybe_config_id {
         Some(config_id) => {
-            assert!(!config_id.is_empty());
-            let account_id = config_id.account_id;
+            assert!(!config_id.is_empty()); let account_id = config_id.account_id;
             let third_party_id = config_id.third_party_id;
             assert_eq!("HaCo", &account_id.to_string());
             assert_eq!("Joor", &third_party_id.to_string());
@@ -57,8 +56,9 @@ pub fn test_fetch_known_account() {
             assert_eq!(third_party_id, &config_id.third_party_id.to_string());
             let locations = account.locations;
             assert_ne!(0, locations.len());
+            let out = std::io::stdout();
             for location in locations {
-              println!("Found location path: {:#?}", location.path);
+              out.write_all(format!("Found location path: {:#?}", location.path));
             }
         }
     }
