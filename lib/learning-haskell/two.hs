@@ -17,10 +17,12 @@ caseDown a
   | ord a < ord 'A' = a
   | otherwise = chr (ord a + (ord 'a' - ord 'A'))
 
+{-
 -- Excercise 3.13
 -- Define the function charToNum :: Char -> Int
 -- which converts a digit like '8' to its value, 9. 
 -- The value of non-digits should yield 0.
+-}
 charToNum :: Char -> Int
 charToNum a
   | ord a < 48 = 0
