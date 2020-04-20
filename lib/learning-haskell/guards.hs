@@ -1,3 +1,11 @@
+{-
+ - This module teaches about guard clauses. 
+ - Guard clauses define specific cases for a function. 
+ - If the input matches the clause, haskell executes the 
+ - expression for that clause. Otherwise it executes the 
+ - otherwise expression. 
+ - This acts a lot like if-then-else structures.
+ -}
 import Prelude
 
 -- Data.Char provides chr and ord which are used below.
