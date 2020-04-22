@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 348d085785892aa5562c8d0922c6e65a75cc64d4466b94420ed5327a269b2294
+-- hash: f54470b3ff655a1b57358ec3a121955d3e1ca8a829030c9fe06785634bfb5afe
 
 name:           One
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/aev-mambro2/One#readme>
-homepage:       https://github.com/aev-mambro2/One#readme
-bug-reports:    https://github.com/aev-mambro2/One/issues
+version:        0.1.0.1
+description:    Please see the README on GitHub at <https://github.com/aev-mambro2/mambro/lib/learning-haskell/One#readme>
+homepage:       https://github.com/aev-mambro2/mambro/lib/learning-haskell/One#readme
+bug-reports:    https://github.com/aev-mambro2/mambro/lib/learning-haskell/One/issues
 author:         A.E.Veltstra
 maintainer:     aev@sdf.org
-copyright:      Attribute-alike
+copyright:      (c) 2020, A.E.Veltstra
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,40 +23,36 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/aev-mambro2/One
+  location: https://github.com/aev-mambro2/mambro/lib/learning-haskell/One
 
 library
   exposed-modules:
-      Lib
   other-modules:
-      Paths_One
   hs-source-dirs:
-      src
   build-depends:
-      base >=4.7 && <5
   default-language: Haskell2010
 
 executable One-exe
   main-is: Main.hs
   other-modules:
-      Paths_One
   hs-source-dirs:
-      app
+      src
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       One
     , base >=4.7 && <5
+    , time
   default-language: Haskell2010
 
 test-suite One-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_One
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       One
     , base >=4.7 && <5
+    , time
   default-language: Haskell2010

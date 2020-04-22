@@ -1,26 +1,27 @@
 name:                One
-version:             0.1.0.0
-github:              "aev-mambro2/One"
+version:             0.1.0.1
+github:              "aev-mambro2/mambro/lib/learning-haskell/One"
 license:             BSD3
 author:              "A.E.Veltstra"
 maintainer:          "aev@sdf.org"
-copyright:           "Attribute-alike"
+copyright:           "(c) 2020, A.E.Veltstra"
 
 extra-source-files:
 - README.md
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+# synopsis:            Teaching myself how haskell projects work.
+# category:            Education 
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/aev-mambro2/One#readme>
+description:         Please see the README on GitHub at <https://github.com/aev-mambro2/mambro/lib/learning-haskell/One#readme>
 
 dependencies:
 - base >= 4.7 && < 5
+- time
 
 library:
   source-dirs: src
@@ -28,7 +29,7 @@ library:
 executables:
   One-exe:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         src
     ghc-options:
     - -threaded
     - -rtsopts
