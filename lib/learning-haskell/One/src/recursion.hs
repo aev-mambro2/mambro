@@ -54,6 +54,12 @@ module Recursion (
     | x == y  = x
     | x > y   = x
     | otherwise = y
+
+  lowest :: Integer -> Integer -> Integer
+  lowest x y
+    | x == y  = x
+    | x < y   = x
+    | otherwise = y
   
   findRemainderInt :: Integer -> Integer -> Integer
   findRemainderInt x y
@@ -75,5 +81,5 @@ module Recursion (
    | x == 0  = 0
    | y == 0  = 0
    | x == y  = x
-   | otherwise = repeatFactorDownToZero x y (highest(half x)(half y))
+   | otherwise = repeatFactorDownToZero x y (lowest x y)
   
