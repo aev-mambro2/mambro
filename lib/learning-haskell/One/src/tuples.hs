@@ -50,3 +50,4 @@ module Tuples where
  -- Or, using the types we made before:
  translateXY :: (X, Y) -> (X, Y) -> (X, Y)
  translateXY (x, y) (dx, dy) = (x+dx, y+dy)
+
