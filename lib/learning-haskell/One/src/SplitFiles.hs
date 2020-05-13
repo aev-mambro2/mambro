@@ -1,16 +1,16 @@
-  {-
+  {-|
    - SplitFiles
    - To read files, split by line, and save each line into a new file.
    - @author A.E.Veltstra <aev@sdf.org>
    - @since 2020-04-29T13:57:00EST
-   - @version 2020-04-29T17:46:00EST
+   - @version 2020-05-13T10:30:00EDT
    -}
 
   import System.Environment
 
   showCount s = show (length s) ++ "\n" 
   
-  -- copies file contents from inputFilePath to file outputFilePath
+  -- |copies file contents from inputFilePath to file outputFilePath
   copyFile [inputFilePath, outputFilePath] = do
     -- read the input file contents
     -- note the grammar: we are executing an IO String action.
@@ -18,7 +18,7 @@
     -- write the contents to the output file
     writeFile outputFilePath contents
 
-  -- Writes each contents into its own file. If the file 
+  -- |Writes each contents into its own file. If the file 
   -- exists, it gets overwritten.
   --
   -- Params: contents, name pattern, sequence number.
@@ -34,7 +34,7 @@
     writeFile (namePattern ++ "-" ++ (show seq) ++ ".txt") contents
 
 
-  -- Writes each of the passed-in records to a file that is named 
+  -- |Writes each of the passed-in records to a file that is named 
   -- after the output file pattern.
   -- Params: records, output file pattern.
   -- Records should be a list of items, each of which is a record 
@@ -49,7 +49,7 @@
         writeFiles (tail xs, outPattern)
   
 
-  -- Params: input file path, output file path pattern.
+  -- |Params: input file path, output file path pattern.
   -- The output file path pattern should expect the working of 
   -- the function outputFile: it adds -#.txt, in which # is 
   -- the sequence number of the line from the original file.

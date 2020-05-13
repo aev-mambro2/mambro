@@ -6,7 +6,7 @@ module Recursion (
   highest
 ) where
 
-  {-
+  {-|
    - A factorial is an example of a recursive function.
    - f(x): f(x-1)*x
    - Haskell is good at resolving recursion without getting 
@@ -75,7 +75,7 @@ module Recursion (
     | (findRemainderInt x z) == 0 && (findRemainderInt y z) == 0 = z
     | otherwise = repeatFactorDownToZero x y (z - 1)
   
-  -- Find Highest Common Integer Factor
+  -- |Find Highest Common Integer Factor
   fhcif :: Integer -> Integer -> Integer
   fhcif x y
    | x == 0  = 0

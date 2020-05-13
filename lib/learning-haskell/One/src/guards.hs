@@ -1,4 +1,4 @@
-{-
+{-|
  - This module teaches about guard clauses. 
  - Guard clauses define specific cases for a function. 
  - If the input matches the clause, haskell executes the 
@@ -8,24 +8,24 @@
  -}
 import Prelude
 
--- Data.Char provides chr and ord which are used below.
+-- |Data.Char provides chr and ord which are used below.
 import Data.Char
 
--- A very naive implementation that ignores Unicode.
+-- |A very naive implementation that ignores Unicode.
 caseUp :: Char -> Char
 caseUp a 
   | ord a < ord 'a' = a
   | ord a > ord 'z' = a
   | otherwise = chr (ord a - (ord 'a' - ord 'A'))
 
--- A very naive implementation that ignores Unicode.
+-- |A very naive implementation that ignores Unicode.
 caseDown :: Char -> Char
 caseDown a 
   | ord a > ord 'Z' = a
   | ord a < ord 'A' = a
   | otherwise = chr (ord a + (ord 'a' - ord 'A'))
 
-{-
+{-|
 -- Excercise 3.13
 -- Define the function charToNum :: Char -> Int
 -- which converts a digit like '8' to its value, 9. 
