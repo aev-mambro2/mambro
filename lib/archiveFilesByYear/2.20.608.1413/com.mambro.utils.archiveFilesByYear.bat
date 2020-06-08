@@ -58,10 +58,10 @@ call :log_amount_of_matching_files "%myScriptName%" %count% "%inputFolder%" "%in
 set current_date_time=[]
 call :fetch_current_date_time current_date_time
 set current_year_month=
-if []==[current_date_time] (
+if []==[%current_date_time%] (
   set current_year_month=0
 ) else (
-  set current_year_month=%current_date_time:0,6%
+  set "current_year_month=%current_date_time:~0,6%"
 )
 
 for /f "tokens=* USEBACKQ" %%A in (`dir /B /A-D /OD "%~2\%~3"`) do (
