@@ -65,7 +65,7 @@ if []==[current_date_time] (
 )
 
 for /f "tokens=* USEBACKQ" %%A in (`dir /B /A-D /OD "%~2\%~3"`) do (
-  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" "%~current_year_month%"
+  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" "%current_year_month%"
 )
 
 :exit
