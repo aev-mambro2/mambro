@@ -7,7 +7,7 @@
 ::
 ::Author: A.E.Veltstra for Mamiye Brothers, Inc. <edibiz@mambro.com>
 ::Original: 2019-10-31T14:00:00EST
-::Version: 2020-06-08T14:37:00EDT
+::Version: 2020-06-08T16:46:00EDT
 
 SETLOCAL ENABLEDELAYEDEXPANSION 
 
@@ -57,18 +57,15 @@ call :log_amount_of_matching_files "%myScriptName%" %count% "%inputFolder%" "%in
 
 set current_date_time=[]
 call :fetch_current_date_time current_date_time
-set current_month=
-set current_year=
+set current_year_month=
 if []==[current_date_time] (
-  set current_month=0
-  set current_year=0
+  set current_year_month=0
 ) else (
-  set current_month=%current_date_time:4,2%
-  set current_year=%current_date_time:0,4%
+  set current_year_month=%current_date_time:0,6%
 )
 
 for /f "tokens=* USEBACKQ" %%A in (`dir /B /A-D /OD "%~2\%~3"`) do (
-  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" "%~current_year%%~current_month%"
+  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" "%~current_year_month%"
 )
 
 :exit
