@@ -7,9 +7,9 @@
 ::
 ::Author: A.E.Veltstra for Mamiye Brothers, Inc. <edibiz@mambro.com>
 ::Original: 2019-10-31T14:00:00EST
-::Version: 2020-06-08T16:46:00EDT
+::Version: 2020-06-09T17:31:00EDT
 
-SETLOCAL ENABLEDELAYEDEXPANSION 
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION 
 
 :identifying_ourselves_in_logging
 echo.
@@ -36,6 +36,22 @@ if %CURRENT_INPUT_PARAMS_LEVEL% NEQ %PARAMS_FOUND_ALL% (
   goto:exit
 )
 
+set current_date=
+call :fetch_current_date current_date
+set current_year_month=
+set current_year_month=%current_date:~0,6%
+if []==[%current_date%] (
+  call :log_error_failed_to_fetch_date_time "%myScriptName%"
+  goto:exit
+) 
+call :log_current_date "%myScriptName%" "%current_date%"
+if []==[%current_year_month%] (
+  call :log_error_failed_to_fetch_yearMonth "%myScriptName%"
+  goto:exit
+)
+call :log_current_year_month "%myScriptName%" "%current_year_month%"
+
+
 :lets_find_7zip
 set pathTo7Zip=
 call :locate_7zip pathTo7Zip
@@ -55,17 +71,8 @@ if %count% EQU 0 (
 
 call :log_amount_of_matching_files "%myScriptName%" %count% "%inputFolder%" "%inputFilePattern%"
 
-set current_date_time=[]
-call :fetch_current_date_time current_date_time
-set current_year_month=
-if []==[%current_date_time%] (
-  set current_year_month=0
-) else (
-  set "current_year_month=%current_date_time:~0,6%"
-)
-
 for /f "tokens=* USEBACKQ" %%A in (`dir /B /A-D /OD "%~2\%~3"`) do (
-  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" "%current_year_month%"
+  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" %current_year_month%
 )
 
 :exit
@@ -90,7 +97,7 @@ exit /B %MY_ERRORLEVEL%
 :: 5. Prefix of the zip file name.
 :: 6. The current yearMonth. The file's yearMonth needs to be older to get archived.
 if %isDebugging% NEQ 0 (
-  echo %date%T%time% Info from %~1: Examining file %~2\%~3 for archivingagainst current yearMonth "%~6".
+  echo %date%T%time% Info from %~1: Examining file %~2\%~3 for archiving against current yearMonth %6.
   echo.
 )
 SETLOCAL 
@@ -98,25 +105,22 @@ SETLOCAL
   call :fetch_year_of_file yearOfFile "%~2" "%~3"
   if "%yearOfFile%" EQU 0 (
     call :log_error_file_year_not_found "%~1" "%~2" "%~3"
+    goto:eof
+  )
+  set /A monthOfFile=0
+  call :fetch_month_of_file monthOfFile "%~2" "%~3"
+  if %isDebugging% NEQ 0 (
+    echo File's yearMonth: "%yearOfFile%%monthOfFile%". Current yearMonth: "%6".
+    echo.
+  )
+  if "%monthOfFile%" EQU 0 (
+    call :log_error_file_month_not_found "%~1" "%~2" "%~3"
+    goto:eof
+  )
+  if "%yearOfFile%%monthOfFile%" LSS "%6" (
+    call "%pathTo7Zip%" a -aou -bb0 -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
   ) else (
-    set /A monthOfFile=0
-    call :fetch_month_of_file monthOfFile "%~2" "%~3"
-    if "%monthOfFile%" EQU 0 (
-      call :log_error_file_month_not_found "%~1" "%~2" "%~3"
-    ) else (
-      if "%yearOfFile%%monthOfFile%" LSS "%~6%~7" (
-        if %isDebugging% NEQ 0 (
-          echo File yearMonth: "%yearOfFile%%monthOfFile%". Current yearMonth: "%~6%~7".
-          echo.
-          call "%pathTo7Zip%" a -aou -bd -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
-          echo.
-        ) else (
-          call "%pathTo7Zip%" a -aou -bb0 -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
-        )
-      ) else (
-        call :log_info_file_too_young "%~1" "%~2" "%~3"
-      )
-    )
+    call :log_info_file_too_young %~1 %~6 %yearOfFile%%monthOfFile% %~3 %~4
   )
 ENDLOCAL
 goto:eof
@@ -163,10 +167,12 @@ set /A PARAMS_FOUND_ALL=15
 goto:eof
 
 
-:fetch_current_date_time
-set current_date_time=[]
-for /F "tokens=1 delims=" %%q in ('Powershell -Command "& {Get-Date -format "yyyyMMdd'T'HHmmss"|"') do ( set fetch_current_date_time=%%q)
-set %~1=%fetch_current_date_time%
+:fetch_current_date
+SETLOCAL ENABLEEXTENSIONS
+  set myNow=[]
+  set dateFormat=yyyyMMdd
+  for /F "tokens=1 USEBACKQ delims=" %%q in (`Powershell -Command "& {Get-Date -format '%dateFormat%'}"`) do set myNow=%%q
+(ENDLOCAL & set %~1=%myNow:~0,8%)
 goto:eof
 
 
@@ -181,9 +187,10 @@ goto:eof
 ::Note: this operates on the assumption that the date formatting on the 
 ::server where this script runs, is American, with the month part of the 
 ::file date returned from positiion 0, measuring 2 characters.
-set fetch_month_of_file_last_mod_date=
-call :fetch_date_of_file fetch_month_of_file_last_mod_date "%~2" "%~3"
-set %~1=%fetch_month_of_file_last_mod_date:~0,2%
+SETLOCAL ENABLEEXTENSIONS
+  set fetch_month_of_file_last_mod_date=
+  call :fetch_date_of_file fetch_month_of_file_last_mod_date "%~2" "%~3"
+(ENDLOCAL & set %~1=%fetch_month_of_file_last_mod_date:~0,2%)
 goto:eof
 
 
@@ -198,9 +205,10 @@ goto:eof
 ::Note: this operates on the assumption that the date formatting on the 
 ::server where this script runs, is American, with the year part of the 
 ::file date returned from positiion 6, measuring 4 characters.
-set fetch_year_of_file_last_mod_date=
-call :fetch_date_of_file fetch_year_of_file_last_mod_date "%~2" "%~3"
-set %~1=%fetch_year_of_file_last_mod_date:~6,4%
+SETLOCAL ENABLEEXTENSIONS
+  set fetch_year_of_file_last_mod_date=
+  call :fetch_date_of_file fetch_year_of_file_last_mod_date "%~2" "%~3"
+(ENDLOCAL & set %~1=%fetch_year_of_file_last_mod_date:~6,4%)
 goto:eof
 
 
@@ -239,7 +247,30 @@ if %isDebugging% NEQ 0 (
   echo %date%T%time% Info from %~1: found %~2 files to archive in input folder '%~3'. They match pattern '%~4'.
   echo.
 )
-goto :eof
+goto:eof
+
+
+:log_current_date
+::Expected parameters:
+:: 0. Global variable isDebugging. If 0, this method skips itself.
+:: 1. Name of this script.
+:: 2. The content of the current date/time. 
+if %isDebugging% NEQ 0 (
+  echo %date%T%time% Info from %~1: found current date to be "%~2".
+  echo.
+)
+goto:eof
+
+:log_current_year_month
+::Expected parameters:
+:: 0. Global variable isDebugging. If 0, this method skips itself.
+:: 1. Name of this script.
+:: 2. The content of the current date/time. 
+if %isDebugging% NEQ 0 (
+  echo %date%T%time% Info from %~1: found current yearMonth to be "%~2".
+  echo.
+)
+goto:eof
 
 
 :log_error_failed_to_fetch_date_time
@@ -251,6 +282,19 @@ goto :eof
 :: 1. Adds global error level FAIL_CURRENT_DATETIME_NOT_FOUND to global parameter MY_ERRORLEVEL.
 set /A "MY_ERRORLEVEL|=%FAIL_CURRENT_DATETIME_NOT_FOUND%"
 echo %date%T%time% Error %FAIL_CURRENT_DATETIME_NOT_FOUND% in %~1: Failed to find current date-time.
+echo.
+goto:eof
+
+
+:log_error_failed_to_fetch_yearMonth
+::Expected parameters:
+:: 0. Global variable FAIL_CURRENT_DATETIME_NOT_FOUND. Echoed to log.
+:: 1. Name of this script.
+::
+::Side Effects:
+:: 1. Adds global error level FAIL_CURRENT_DATETIME_NOT_FOUND to global parameter MY_ERRORLEVEL.
+set /A "MY_ERRORLEVEL|=%FAIL_CURRENT_DATETIME_NOT_FOUND%"
+echo %date%T%time% Error %FAIL_CURRENT_DATETIME_NOT_FOUND% in %~1: Failed to find current yearMonth.
 echo.
 goto:eof
 
@@ -298,7 +342,7 @@ goto:eof
 
 
 :log_info_file_too_young 
-echo %date%T%time% Info in %~1: skipping archiving of file because it is too young: "%~2\%~3".
+echo %date%T%time% Info in %~1: skipping archiving of file because it is too young: current yearMonth %2 is too close to file yearMonth %3 for file "%4" in folder "%5".
 goto:eof
 
 
