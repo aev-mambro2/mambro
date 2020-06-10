@@ -3,6 +3,7 @@
 ::Archiver Tester. This task runs a script that archives files.
 ::Author: A.E.Veltstra for Mamiye Brothers, Inc.
 ::Original: 2020-06-08T16:13:00EDT
+::Updated: 2020-06-10T15:51:00EDT
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
@@ -28,7 +29,7 @@ set "inputFilePattern=*.*.xml"
 ::the zip extension.
 set "archiveZipFileNamePrefix=archive"
 
-cmd /D /Q /C "M:\MamiyeSharedLibraries\com.mambro.utils.archiveFilesByYear\2.20.608.1413\com.mambro.utils.archiveFilesByYear.bat %isDebugging% %inputFolder% %inputFilePattern% %archiveZipFileNamePrefix% 1>>%stdOut% 2>>%stdErr%"
+cmd /D /Q /C "com.mambro.utils.archiveFilesByYear.bat %isDebugging% %inputFolder% %inputFilePattern% %archiveZipFileNamePrefix% 1>>%stdOut% 2>>%stdErr%"
 
 ENDLOCAL
 

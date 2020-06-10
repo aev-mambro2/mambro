@@ -7,7 +7,7 @@
 ::
 ::Author: A.E.Veltstra for Mamiye Brothers, Inc. <edibiz@mambro.com>
 ::Original: 2019-10-31T14:00:00EST
-::Version: 2020-06-09T17:31:00EDT
+::Version: 2020-06-10T16:55:00EDT
 
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION 
 
@@ -47,7 +47,7 @@ call :log_current_year_month "%myScriptName%" "%current_year_month%"
 
 :lets_find_7zip
 set pathTo7Zip=
-call :locate_7zip pathTo7Zip
+call fetch_app_location.bat pathTo7Zip "c:\" "7z.exe"
 if "%pathTo7Zip%"=="" (
   call:notify_missing_7zip "%myScriptName%"
   goto:exit
@@ -56,7 +56,7 @@ if "%pathTo7Zip%"=="" (
 :determine_whether_matching_files_exist
 ::Let's find how many files fit the pattern.
 set count=0
-call :count_files_matching_pattern count "%inputFolder%" "%inputFilePattern%"
+call count_files_for_pattern.bat count "%inputFolder%" "%inputFilePattern%"
 if %count% EQU 0 (
   call:log_warning_no_files "%myScriptName%" "%inputFolder%" "%inputFilePattern%"
   goto:exit
@@ -119,19 +119,6 @@ ENDLOCAL
 goto:eof
 
 
-:count_files_matching_pattern
-::Counts files that match the passed-in pattern.
-::
-::Expected parameters:
-:: 1. Output receiver
-:: 2. Folder in which to look for files
-:: 3. GLOB file name pattern against which to match existing files
-::
-::Returns: the amount of matching files.
-for /f %%i in ('dir /B /A-D "%~2\%~3" ^| find /c /v ""') do (set /a %~1=%%i)
-goto:eof
-
-
 :enumerate_error_levels
 ::Error levels. Success = 0. 
 ::Each next is a power of 2 higher than the last.
@@ -157,75 +144,6 @@ set /A PARAM_INPUT_FILE_PATTERN_FOUND=4
 set /A PARAM_ZIP_FILE_NAME_PREFIX_FOUND=8
 ::1|2|4|8=15
 set /A PARAMS_FOUND_ALL=15
-goto:eof
-
-
-:fetch_current_date
-SETLOCAL ENABLEEXTENSIONS
-  set myNow=[]
-  set dateFormat=yyyyMMdd
-  for /F "tokens=1 USEBACKQ delims=" %%q in (`Powershell -Command "& {Get-Date -format '%dateFormat%'}"`) do set myNow=%%q
-(ENDLOCAL & set %~1=%myNow:~0,8%)
-goto:eof
-
-
-:fetch_month_of_file
-::Expected parameters:
-:: 1. Output receiver
-:: 2. Folder in which the file was found.
-:: 3. Name of the file to examine.
-::
-::Returns: the month of the last-modified date.
-::
-::Note: this operates on the assumption that the date formatting on the 
-::server where this script runs, is American, with the month part of the 
-::file date returned from positiion 0, measuring 2 characters.
-SETLOCAL ENABLEEXTENSIONS
-  set fetch_month_of_file_last_mod_date=
-  call :fetch_date_of_file fetch_month_of_file_last_mod_date "%~2" "%~3"
-(ENDLOCAL & set %~1=%fetch_month_of_file_last_mod_date:~0,2%)
-goto:eof
-
-
-:fetch_year_of_file
-::Expected parameters:
-:: 1. Output receiver
-:: 2. Folder in which the file was found.
-:: 3. Name of the file to examine.
-::
-::Returns: the year of the last-modified date.
-::
-::Note: this operates on the assumption that the date formatting on the 
-::server where this script runs, is American, with the year part of the 
-::file date returned from positiion 6, measuring 4 characters.
-SETLOCAL ENABLEEXTENSIONS
-  set fetch_year_of_file_last_mod_date=
-  call :fetch_date_of_file fetch_year_of_file_last_mod_date "%~2" "%~3"
-(ENDLOCAL & set %~1=%fetch_year_of_file_last_mod_date:~6,4%)
-goto:eof
-
-
-:fetch_date_of_file
-::Expected parameters:
-:: 1. Output receiver
-:: 2. Folder in which the file was found.
-:: 3. Name of the file to examine.
-::
-::Returns: the last-modified date.
-::See: https://stackoverflow.com/questions/2111333/how-to-get-files-last-modified-date-on-windows-command-line#2116420
-for %%a in ("%~2\%~3") do set %~1=%%~ta
-goto:eof
-
-
-
-:locate_7zip
-::Assuming the programs installation folder is c:\. 
-::
-::Expected parameters:
-:: 1. Output receiver
-::
-::Returns the file path of the installation location of the executable named '7-z.exe'.
-FOR /F "tokens=* USEBACKQ" %%F in (`WHERE /r c:\ 7z.exe`) DO set %~1=%%F
 goto:eof
 
 
