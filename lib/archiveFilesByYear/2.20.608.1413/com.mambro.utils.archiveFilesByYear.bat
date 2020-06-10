@@ -36,15 +36,8 @@ if %CURRENT_INPUT_PARAMS_LEVEL% NEQ %PARAMS_FOUND_ALL% (
   goto:exit
 )
 
-set current_date=
-call :fetch_current_date current_date
 set current_year_month=
-set current_year_month=%current_date:~0,6%
-if []==[%current_date%] (
-  call :log_error_failed_to_fetch_date_time "%myScriptName%"
-  goto:exit
-) 
-call :log_current_date "%myScriptName%" "%current_date%"
+call fetch_current_date_formatted.bat current_year_month yyyyMM
 if []==[%current_year_month%] (
   call :log_error_failed_to_fetch_yearMonth "%myScriptName%"
   goto:exit
@@ -102,22 +95,22 @@ if %isDebugging% NEQ 0 (
 )
 SETLOCAL 
   set /A yearOfFile=0
-  call :fetch_year_of_file yearOfFile "%~2" "%~3"
-  if "%yearOfFile%" EQU 0 (
+  call fetch_year_of_file.bat yearOfFile "%~2" "%~3"
+  if "%yearOfFile%"=="0" (
     call :log_error_file_year_not_found "%~1" "%~2" "%~3"
     goto:eof
   )
   set /A monthOfFile=0
-  call :fetch_month_of_file monthOfFile "%~2" "%~3"
+  call fetch_month_of_file.bat monthOfFile "%~2" "%~3"
   if %isDebugging% NEQ 0 (
     echo File's yearMonth: "%yearOfFile%%monthOfFile%". Current yearMonth: "%6".
     echo.
   )
-  if "%monthOfFile%" EQU 0 (
+  if "%monthOfFile%"=="0" (
     call :log_error_file_month_not_found "%~1" "%~2" "%~3"
     goto:eof
   )
-  if "%yearOfFile%%monthOfFile%" LSS "%6" (
+  if %yearOfFile%%monthOfFile% LSS %6 (
     call "%pathTo7Zip%" a -aou -bb0 -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
   ) else (
     call :log_info_file_too_young %~1 %~6 %yearOfFile%%monthOfFile% %~3 %~4

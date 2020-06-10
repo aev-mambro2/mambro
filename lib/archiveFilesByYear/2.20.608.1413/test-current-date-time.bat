@@ -1,4 +1,7 @@
 @ECHO OFF
+::Author: A.E.Veltstra
+::Original: 2020-06-08T16:13:00EDT
+
 SETLOCAL EnableExtensions EnableDelayedExpansion
 
 ::Verbosity = [run, debug]
@@ -17,8 +20,9 @@ exit /B 0
 
 
 :prerequisite
+set dateFormat=yyyyMMdd
 set prereq_buffer1=
-call :fetch_current_date prereq_buffer1
+call fetch_current_date_formatted.bat prereq_buffer1 %dateFormat%
 if %verbosity%==debug (
   echo prereq buffer1: %prereq_buffer1%
 )
@@ -56,16 +60,4 @@ SETLOCAL ENABLEEXTENSIONS
     echo FAILED test r2.3: 7th position in value should be empty. Got: %pos7%.
   )
 ENDLOCAL
-goto:eof
-
-
-:fetch_current_date
-SETLOCAL ENABLEEXTENSIONS
-  set myNow=[]
-  set dateFormat=yyyyMMdd
-  for /F "tokens=1 USEBACKQ delims=" %%q in (`Powershell -Command "& {Get-Date -format '%dateFormat%'}"`) do set myNow=%%q
-  if %verbosity%==debug (
-    echo fetch_current_date: %myNow:~0,8%
-  )
-(ENDLOCAL & set %~1=%myNow:~0,8%)
 goto:eof
