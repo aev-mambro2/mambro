@@ -4,6 +4,7 @@
 
 :fetch_year_of_file
 ::Fetches the year of the last modified date of a file.
+::Assumes that the user's date format is American: MM/dd/yyyy.
 ::
 ::Parameters:
 ::1. Output receptor. Will be set to the year of the file date if found.
