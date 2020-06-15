@@ -7,7 +7,7 @@
 ::
 ::Author: A.E.Veltstra for Mamiye Brothers, Inc. <edibiz@mambro.com>
 ::Original: 2019-10-31T14:00:00EST
-::Version: 2020-06-10T16:55:00EDT
+::Version: 2020-06-12T15:33:00EDT
 
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION 
 
@@ -15,6 +15,13 @@ SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 echo.
 echo %date%T%time% this script is %~dpnx0
 echo.
+
+::Switch verbose logging. Set to 0 to disable, 1 to enable.
+set /A isDebugging=%~1
+
+::Switch dry run. Set to 0 to disable (files get archived),
+::to 1 to enable (archiving gets skipped).
+set /A doDryRun=0
 
 ::The file name of this very script. 
 set thisScript=%~nx0
@@ -36,27 +43,19 @@ if %CURRENT_INPUT_PARAMS_LEVEL% NEQ %PARAMS_FOUND_ALL% (
   goto:exit
 )
 
-set current_year_month=
-call fetch_current_date_formatted.bat current_year_month yyyyMM
-if []==[%current_year_month%] (
-  call :log_error_failed_to_fetch_yearMonth "%myScriptName%"
+set current_yyyyMMdd=
+call %~dp0\fetch_current_date_formatted.cmd current_yyyyMMdd yyyyMMdd
+if []==[%current_yyyyMMdd%] (
+  call :log_error_failed_to_fetch_yyyyMMdd "%myScriptName%"
   goto:exit
 )
-call :log_current_year_month "%myScriptName%" "%current_year_month%"
+call :log_current_yyyyMMdd "%myScriptName%" "%current_yyyyMMdd%"
 
-
-:lets_find_7zip
-set pathTo7Zip=
-call fetch_app_location.bat pathTo7Zip "c:\" "7z.exe"
-if "%pathTo7Zip%"=="" (
-  call:notify_missing_7zip "%myScriptName%"
-  goto:exit
-)
 
 :determine_whether_matching_files_exist
 ::Let's find how many files fit the pattern.
 set count=0
-call count_files_for_pattern.bat count "%inputFolder%" "%inputFilePattern%"
+call %~dp0\count_files_for_pattern.cmd count "%inputFolder%" "%inputFilePattern%"
 if %count% EQU 0 (
   call:log_warning_no_files "%myScriptName%" "%inputFolder%" "%inputFilePattern%"
   goto:exit
@@ -64,8 +63,21 @@ if %count% EQU 0 (
 
 call :log_amount_of_matching_files "%myScriptName%" %count% "%inputFolder%" "%inputFilePattern%"
 
+:lets_find_7zip
+if 1 EQU %doDryRun% (
+  goto:skip_searching_for_7zip
+)
+set pathTo7Zip=
+call %~dp0\fetch_app_location.cmd pathTo7Zip "c:\" "7z.exe"
+if "%pathTo7Zip%"=="" (
+  call:notify_missing_7zip "%myScriptName%"
+  goto:exit
+)
+:skip_searching_for_7zip
+
+:archive_each_matching_file
 for /f "tokens=* USEBACKQ" %%A in (`dir /B /A-D /OD "%~2\%~3"`) do (
-  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" %current_year_month%
+  call :archive_file "%myScriptName%" "%~2" "%%A" "%pathTo7Zip%" "%zipNamePrefix%" %current_yyyyMMdd%
 )
 
 :exit
@@ -88,32 +100,41 @@ exit /B %MY_ERRORLEVEL%
 :: 3. Name of the file to archive.
 :: 4. Path to the 7-zip executable.
 :: 5. Prefix of the zip file name.
-:: 6. The current yearMonth. The file's yearMonth needs to be older to get archived.
+:: 6. The current yyyyMMdd. The file's yyyyMMdd needs to be at least
+::    a month older to get archived.
 if %isDebugging% NEQ 0 (
   echo %date%T%time% Info from %~1: Examining file %~2\%~3 for archiving against current yearMonth %6.
   echo.
 )
 SETLOCAL 
-  set /A yearOfFile=0
-  call fetch_year_of_file.bat yearOfFile "%~2" "%~3"
-  if "%yearOfFile%"=="0" (
-    call :log_error_file_year_not_found "%~1" "%~2" "%~3"
+  set /A dateOfFile=0
+  call %~dp0\fetch_date_of_file.cmd dateOfFile "%~2" "%~3"
+  if "%dateOfFile%"=="0" (
+    call :log_error_file_date_not_found "%~1" "%~2" "%~3"
     goto:eof
   )
-  set /A monthOfFile=0
-  call fetch_month_of_file.bat monthOfFile "%~2" "%~3"
-  if %isDebugging% NEQ 0 (
-    echo File's yearMonth: "%yearOfFile%%monthOfFile%". Current yearMonth: "%6".
-    echo.
+  set /A fileYearMonthDay=0
+  set /A yearOfFile=%dateOfFile:~6,4%
+  set fileYearMonthDay=%yearOfFile%%dateOfFile:~0,2%%dateOfFile:~3,2%
+  if 1 EQU %isDebugging% (
+    echo archive_file.dateOfFile: [%dateOfFile%]
+    echo archive_file.yearOfFile: [%yearOfFile%]
+    echo archive_file.fileYearMonthDay: [%fileYearMonthDay%]
   )
-  if "%monthOfFile%"=="0" (
-    call :log_error_file_month_not_found "%~1" "%~2" "%~3"
+  if []==[%fileYearMonthDay%] (
+    call :log_error_file_yyyyMMdd_not_found "%~1" "%~2" "%~3" "%dateOfFile%"
     goto:eof
   )
-  if %yearOfFile%%monthOfFile% LSS %6 (
-    call "%pathTo7Zip%" a -aou -bb0 -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
+  set /A datesCompared=0
+  call %~dp0\differs_less_than_a_month.cmd datesCompared %fileYearMonthDay% %6
+  if 0 EQU %datesCompared% (
+    if 1 EQU %doDryRun% (
+      echo archive_file info from "%~1": dry run is enabled, thus skipping the archiving of file "%~2\%~3".
+    ) else (
+      call "%pathTo7Zip%" a -aou -bb0 -sdel "%~2\%~5-%yearOfFile%.zip" "%~2\%~3"
+    )
   ) else (
-    call :log_info_file_too_young %~1 %~6 %yearOfFile%%monthOfFile% %~3 %~4
+    call :log_info_file_too_young %~1 %~6 %fileYearMonthDay% %~3 %~2 %datesCompared%
   )
 ENDLOCAL
 goto:eof
@@ -130,8 +151,7 @@ set /A FAIL_NOT_ALL_PARAMETERS_FOUND=4
 set /A FAIL_7ZIP_NOT_FOUND=8
 set /A FAIL_CURRENT_DATETIME_NOT_FOUND=16
 set /A FAIL_CURRENT_DATETIME_FORMAT_YIELDED_EMPTY=32
-set /A FAIL_FILE_YEAR_NOT_FOUND=64
-set /A FAIL_FILE_MONTH_NOT_FOUND=132
+set /A FAIL_FILE_DATE_NOT_FOUND=64
 goto:eof
 
 
@@ -172,13 +192,13 @@ if %isDebugging% NEQ 0 (
 )
 goto:eof
 
-:log_current_year_month
+:log_current_yyyyMMdd
 ::Expected parameters:
 :: 0. Global variable isDebugging. If 0, this method skips itself.
 :: 1. Name of this script.
 :: 2. The content of the current date/time. 
 if %isDebugging% NEQ 0 (
-  echo %date%T%time% Info from %~1: found current yearMonth to be "%~2".
+  echo %date%T%time% Info from %~1: found current yyyyMMdd to be "%~2".
   echo.
 )
 goto:eof
@@ -197,7 +217,7 @@ echo.
 goto:eof
 
 
-:log_error_failed_to_fetch_yearMonth
+:log_error_failed_to_fetch_yyyyMMdd
 ::Expected parameters:
 :: 0. Global variable FAIL_CURRENT_DATETIME_NOT_FOUND. Echoed to log.
 :: 1. Name of this script.
@@ -205,36 +225,36 @@ goto:eof
 ::Side Effects:
 :: 1. Adds global error level FAIL_CURRENT_DATETIME_NOT_FOUND to global parameter MY_ERRORLEVEL.
 set /A "MY_ERRORLEVEL|=%FAIL_CURRENT_DATETIME_NOT_FOUND%"
-echo %date%T%time% Error %FAIL_CURRENT_DATETIME_NOT_FOUND% in %~1: Failed to find current yearMonth.
+echo %date%T%time% Error %FAIL_CURRENT_DATETIME_NOT_FOUND% in %~1: Failed to find current yyyyMMdd.
 echo.
 goto:eof
 
 
-:log_error_file_month_not_found
+:log_error_file_date_not_found
 ::Expected parameters:
-:: 0. Global variable FAIL_FILE_MONTH_NOT_FOUND. Echoed to log.
+:: 0. Global variable FAIL_FILE_DATE_NOT_FOUND. Echoed to log.
 :: 1. Name of this script.
 :: 2. Folder in which the file was found.
 :: 3. Name of the file to archive.
 ::
 ::Side Effects:
-:: 1. Adds global error level FAIL_FILE_MONTH_NOT_FOUND to global parameter MY_ERRORLEVEL.
-set /A "MY_ERRORLEVEL|=%FAIL_FILE_MONTH_NOT_FOUND%"
-echo %date%T%time% Error %FAIL_FILE_MONTH_NOT_FOUND% in %~1: Month not found for file %~2\%~3.
+:: 1. Adds global error level FAIL_FILE_DATE_NOT_FOUND to global parameter MY_ERRORLEVEL.
+set /A "MY_ERRORLEVEL|=%FAIL_FIL_DATE_NOT_FOUND%"
+echo %date%T%time% Error %FAIL_FILE_DATE_NOT_FOUND% in %~1: Date not found for file %~2\%~3.
 echo.
 goto:eof
 
-:log_error_file_year_not_found
+:log_error_file_yyyyMMdd_not_found
 ::Expected parameters:
-:: 0. Global variable FAIL_FILE_YEAR_NOT_FOUND. Echoed to log.
+:: 0. Global variable FAIL_FILE_DATE_NOT_FOUND. Echoed to log.
 :: 1. Name of this script.
 :: 2. Folder in which the file was found.
 :: 3. Name of the file to archive.
 ::
 ::Side Effects:
-:: 1. Adds global error level FAIL_FILE_YEAR_NOT_FOUND to global parameter MY_ERRORLEVEL.
-set /A "MY_ERRORLEVEL|=%FAIL_FILE_YEAR_NOT_FOUND%"
-echo %date%T%time% Error %FAIL_FILE_YEAR_NOT_FOUND% in %~1: Year not found for file %~2\%~3.
+:: 1. Adds global error level FAIL_FILE_DATE_NOT_FOUND to global parameter MY_ERRORLEVEL.
+set /A "MY_ERRORLEVEL|=%FAIL_FILE_DATE_NOT_FOUND%"
+echo %date%T%time% Error %FAIL_FILE_DATE_NOT_FOUND% in %~1: Year not found for file %~2\%~3.
 echo.
 goto:eof
 
@@ -253,7 +273,7 @@ goto:eof
 
 
 :log_info_file_too_young 
-echo %date%T%time% Info in %~1: skipping archiving of file because it is too young: current yearMonth %2 is too close to file yearMonth %3 for file "%4" in folder "%5".
+echo %date%T%time% Info in %~1: skipping archiving of file because it is too young: current yyyyMMdd %2 is too close to file yyyyMMdd %3 for file "%~4" in folder "%~5". Comparison returned "%~6".
 goto:eof
 
 

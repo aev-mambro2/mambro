@@ -22,7 +22,7 @@ exit /B 0
 :prerequisite
 set dateFormat=yyyyMMdd
 set prereq_buffer1=
-call fetch_current_date_formatted.bat prereq_buffer1 %dateFormat%
+call %~dp0\fetch_current_date_formatted.cmd prereq_buffer1 %dateFormat%
 if %verbosity%==debug (
   echo prereq buffer1: %prereq_buffer1%
 )

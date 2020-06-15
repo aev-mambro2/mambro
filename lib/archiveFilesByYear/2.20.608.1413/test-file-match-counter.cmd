@@ -20,8 +20,8 @@ exit /B 0
 set amount=0
 ::parent folder of this script
 set inputFolder=%~dp0
-set pattern=*.bat
-call count_files_for_pattern.bat amount %inputFolder% %pattern%
+set pattern=*.cmd
+call %~dp0\count_files_for_pattern.cmd amount %inputFolder% %pattern%
 if %verbosity%==debug (
   echo r1.amount: %amount%
 )

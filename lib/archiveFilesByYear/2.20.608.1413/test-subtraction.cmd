@@ -103,7 +103,7 @@ goto:eof
 ::and test whether that gives any non-zero value.
 SETLOCAL ENABLEEXTENSIONS
   set /A dateOfFile=0
-  call fetch_date_of_file.bat dateOfFile %test_input_folder% %test_input_file%
+  call fetch_date_of_file.cmd dateOfFile %test_input_folder% %test_input_file%
   set /A fileYearMonthDay=0
   set fileYearMonthDay=%dateOfFile:~6,4%%dateOfFile:~0,2%%dateOfFile:~3,2%
   if %verbosity%==debug (
@@ -141,7 +141,7 @@ SETLOCAL ENABLEEXTENSIONS
   set /A mA=20200611
   set /A mB=20200501
   set /A mC=0
-  call differs_less_than_100.bat mC %mA% %mB%
+  call %~dp0\differs_less_than_100.cmd mC %mA% %mB%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -155,7 +155,7 @@ SETLOCAL ENABLEEXTENSIONS
   )
   echo %result% test r6.2: expected %mA% to differ more than 100 from %mB%.
   set /A mC=0
-  call differs_less_than_100.bat mC %mB% %mA%
+  call %~dp0\differs_less_than_100.cmd mC %mB% %mA%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -179,7 +179,7 @@ SETLOCAL ENABLEEXTENSIONS
   set /A mA=20200611
   set /A mB=20200512
   set /A mC=0
-  call differs_less_than_100.bat mC %mA% %mB%
+  call %~dp0\differs_less_than_100.cmd mC %mA% %mB%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -193,7 +193,7 @@ SETLOCAL ENABLEEXTENSIONS
   )
   echo %result% test r7.2: expected %mA% to differ less than 100 from %mB%.
   set /A mC=0
-  call differs_less_than_100.bat mC %mB% %mA%
+  call %~dp0\differs_less_than_100.cmd mC %mB% %mA%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -217,7 +217,7 @@ SETLOCAL ENABLEEXTENSIONS
   set mA=20210111
   set mB=20201212
   set mC=0
-  call differs_between_8870_and_8900.bat mC %mA% %mB%
+  call %~dp0\differs_between_8870_and_8900.cmd mC %mA% %mB%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -231,7 +231,7 @@ SETLOCAL ENABLEEXTENSIONS
   )
   echo %result% test r8.2: expected %mA% to differ less than a month from %mB%.
   set mC=0
-  call differs_between_8870_and_8900.bat mC %mB% %mA%
+  call %~dp0\differs_between_8870_and_8900.cmd mC %mB% %mA%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -255,7 +255,7 @@ SETLOCAL ENABLEEXTENSIONS
   set mA=20210112
   set mB=20201211
   set mC=0
-  call differs_between_8870_and_8900.bat mC %mA% %mB%
+  call %~dp0\differs_between_8870_and_8900.cmd mC %mA% %mB%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -269,7 +269,7 @@ SETLOCAL ENABLEEXTENSIONS
   )
   echo %result% test r9.2: expected %mA% to differ more than a month from %mB%.
   set mC=0
-  call differs_between_8870_and_8900.bat mC %mB% %mA%
+  call %~dp0\differs_between_8870_and_8900.cmd mC %mB% %mA%
   if []==[%mC%] (
     set result=FAILED
   ) else (
@@ -290,13 +290,13 @@ goto:eof
 ::can be found to differ less than a month.
 SETLOCAL ENABLEEXTENSIONS
   set /A found1=0
-  call differs_less_than_a_month.bat found1 20200701 20200611
+  call %~dp0\differs_less_than_a_month.cmd found1 20200701 20200611
   set /A found2=0
-  call differs_less_than_a_month.bat found2 20200130 20191231
+  call %~dp0\differs_less_than_a_month.cmd found2 20200130 20191231
   set /A found3=0
-  call differs_less_than_a_month.bat found3 20200131 20191231
+  call %~dp0\differs_less_than_a_month.cmd found3 20200131 20191231
   set /A found4=0
-  call differs_less_than_a_month.bat found4 20200101 20191201
+  call %~dp0\differs_less_than_a_month.cmd found4 20200101 20191201
   set result1=FAILED
   if 1 EQU %found1% (
     set result1=SUCCEEDED
@@ -326,13 +326,15 @@ goto:eof
 ::can be found to differ more than a month.
 SETLOCAL ENABLEEXTENSIONS
   set /A found1=0
-  call differs_less_than_a_month.bat found1 20200711 20200601
+  call %~dp0\differs_less_than_a_month.cmd found1 20200711 20200601
   set /A found2=0
-  call differs_less_than_a_month.bat found2 20200131 20191130
+  call %~dp0\differs_less_than_a_month.cmd found2 20200131 20191130
   set /A found3=0
-  call differs_less_than_a_month.bat found3 20200201 20191231
+  call %~dp0\differs_less_than_a_month.cmd found3 20200201 20191231
   set /A found4=0
-  call differs_less_than_a_month.bat found4 20200102 20191201
+  call %~dp0\differs_less_than_a_month.cmd found4 20200102 20191201
+  set /A found5=0
+  call %~dp0\differs_less_than_a_month.cmd found5 20200612 20200430
   set result1=FAILED
   if 0 EQU %found1% (
     set result1=SUCCEEDED
@@ -349,10 +351,15 @@ SETLOCAL ENABLEEXTENSIONS
   if 0 EQU %found4% (
     set result4=SUCCEEDED
   )
+  set result5=FAILED
+  if 0 EQU %found5% (
+    set result5=SUCCEEDED
+  )
   echo %result1% test r11.1: 20200711 must differ more than a month from 20200601.
   echo %result2% test r11.2: 20200131 must differ more than a month from 20191130.
   echo %result3% test r11.3: 20200201 must differ more than a month from 20191231.
   echo %result4% test r11.4: 20200102 must differ more than a month from 20191201.
+  echo %result5% test r11.5: 20200612 must differ more than a month from 20200430.
 ENDLOCAL
 goto:eof
 

@@ -27,7 +27,7 @@ SETLOCAL ENABLEEXTENSIONS
   )
 
   set fetched_month_of_file_last_mod_date=
-  call fetch_date_of_file.bat fetched_month_of_file_last_mod_date "%~2" "%~3"
+  call %~dp0\fetch_date_of_file.cmd fetched_month_of_file_last_mod_date "%~2" "%~3"
   if %verbosity%==debug (
     echo fetch_month_of_file.received: [%fetched_month_of_file_last_mod_date%]
   )

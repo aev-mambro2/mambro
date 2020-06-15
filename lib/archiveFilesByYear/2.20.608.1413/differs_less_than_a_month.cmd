@@ -29,12 +29,12 @@ SETLOCAL ENABLEEXTENSIONS
   set /A mC=0
   set /A mD=0
   set /A output=0
-  call differs_less_than_100.bat mC %mA% %mB%
+  call %~dp0\differs_less_than_100.cmd mC %mA% %mB%
   if 1 EQU %mC% (
     set /A output=1
     goto:dlm_exit
   )
-  call differs_between_8870_and_8900.bat mD %mA% %mB%
+  call %~dp0\differs_between_8870_and_8900.cmd mD %mA% %mB%
   if 1 EQU %mD% (
     set /A output=1
   )

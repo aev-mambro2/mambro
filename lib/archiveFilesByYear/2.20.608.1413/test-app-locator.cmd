@@ -20,7 +20,7 @@ exit /B 0
 set outputLocation=
 set inputFolder=c:\
 set executableName=7z.exe
-call fetch_app_location.bat outputLocation %inputFolder% %executableName%
+call %~dp0\fetch_app_location.cmd outputLocation %inputFolder% %executableName%
 if %verbosity%==debug (
   echo r1.outputLocation: %outputLocation%
 )

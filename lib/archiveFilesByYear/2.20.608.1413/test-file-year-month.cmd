@@ -28,7 +28,7 @@ exit /B 0
 ::whether the found value exists and has a length of 4.
 SETLOCAL ENABLEEXTENSIONS
   set /A yearOfFile=0
-  call fetch_year_of_file.bat yearOfFile %test_input_folder% %test_input_file%
+  call %~dp0\fetch_year_of_file.cmd yearOfFile %test_input_folder% %test_input_file%
   if %verbosity%==debug (
     echo r1.yearOfFile: [%yearOfFile%]
   )
@@ -59,7 +59,7 @@ goto:eof
 ::whether the found value exists and has a length of 2.
 SETLOCAL ENABLEEXTENSIONS
   set /A monthOfFile=0
-  call fetch_month_of_file.bat monthOfFile %test_input_folder% %test_input_file%
+  call %~dp0\fetch_month_of_file.cmd monthOfFile %test_input_folder% %test_input_file%
   if %verbosity%==debug (
     echo r2.monthOfFile: [%monthOfFile%]
   )
@@ -84,12 +84,12 @@ goto:eof
 ::year and month.
 SETLOCAL ENABLEEXTENSIONS
   set /A monthOfFile=0
-  call fetch_month_of_file.bat monthOfFile %test_input_folder% %test_input_file%
+  call %~dp0\fetch_month_of_file.cmd monthOfFile %test_input_folder% %test_input_file%
   set /A yearOfFile=0
-  call fetch_year_of_file.bat yearOfFile %test_input_folder% %test_input_file%
+  call %~dp0\fetch_year_of_file.cmd yearOfFile %test_input_folder% %test_input_file%
   set yearMonthOfFile=%yearOfFile%%monthOfFile%
   set currentYearMonth=0
-  call fetch_current_date_formatted.bat currentYearMonth yyyyMM
+  call %~dp0\fetch_current_date_formatted.cmd currentYearMonth yyyyMM
   if %verbosity%==debug (
     echo r3.yearMonthOfFile: [%yearMonthOfFile%]
     echo r3.currentYearMonth: [%currentYearMonth%]
