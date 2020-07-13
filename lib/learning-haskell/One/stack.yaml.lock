@@ -5,12 +5,54 @@
 
 packages:
 - completed:
-    hackage: time-1.9.1@sha256:2c62d82e2f5edba65e7e1a9531b6ac408bb940a1887b4e0786b249d62942a202,5679
+    hackage: cryptonite-0.27@sha256:b75ec07ef0244574aa5374f0a1b349dff8c8f84583cb6c58fd95e565245716d4,18143
     pantry-tree:
-      size: 6558
-      sha256: 0f9ec716c46147e85bf6d92c67e64222e49abbd2392fa71510525b57d4dfc784
+      size: 22989
+      sha256: 1a63bb79748aeb2c0312d6a166fe8436a139929b017bf208f002e79073d21966
   original:
-    hackage: time-1.9.1
+    hackage: cryptonite-0.27
+- completed:
+    hackage: cryptostore-0.2.1.0@sha256:9896e2984f36a1c8790f057fd5ce3da4cbcaf8aa73eb2d9277916886978c5b19,3881
+    pantry-tree:
+      size: 8596
+      sha256: e392f8dded050690140636b81433fb350bd87dd21643dde9a2f0aa344cf038e5
+  original:
+    hackage: cryptostore-0.2.1.0
+- completed:
+    hackage: text-1.2.4.0@sha256:8c24450feb8e3bbb7ea3e17af24ef57e85db077c4bf53e5bcc345b283d1b1d5b,10081
+    pantry-tree:
+      size: 7457
+      sha256: 3437b0a73ce2ae1a81aa8b3438d41a85981c00894cdbee0d6d6d6873046a5d5d
+  original:
+    hackage: text-1.2.4.0
+- completed:
+    hackage: time-1.8.0.4@sha256:3f6eddf238b828eb4f82683acce1c3afe64784f0d20114239b738c123316c85c,5494
+    pantry-tree:
+      size: 5406
+      sha256: 1a186b21ff55d3e8f7d66ed2075bbce4dcc9ccaeef87665aa88752412f14073f
+  original:
+    hackage: time-1.8.0.4
+- completed:
+    hackage: HDBC-2.4.0.3@sha256:99d3de808f53271afb0a8c31adfc99c7ef94f28355aba58bb0c9dffd4376296f,2998
+    pantry-tree:
+      size: 1004
+      sha256: 4a151afa92d9d77a85b5d05583b93744bbec353b995a07daf4a4739211ced292
+  original:
+    hackage: HDBC-2.4.0.3
+- completed:
+    hackage: HDBC-odbc-2.6.0.0@sha256:4fbd28f437cb2f1707d77aa81a356870d84407942c89c20c7613f99f3bb0eb5d,2730
+    pantry-tree:
+      size: 1823
+      sha256: 7f38220f11a62dfeaa114010179d28d851b3cb66ea6d7ba2b9288874c64f8075
+  original:
+    hackage: HDBC-odbc-2.6.0.0
+- completed:
+    hackage: x509-1.7.5@sha256:01185a9a17bee4e89287d9e32bfaa673133cf2b09a39759627bed1f72ea528fd,2305
+    pantry-tree:
+      size: 1072
+      sha256: 42cc162fbe2221555fb4d91e3de6699bc7731887c2c0e01ad79c8bf6ade988d9
+  original:
+    hackage: x509-1.7.5
 snapshots:
 - completed:
     size: 524996

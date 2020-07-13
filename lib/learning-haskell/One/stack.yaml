@@ -3,7 +3,13 @@ packages:
 - .
 
 extra-deps:
-  - time-1.9.1
+  - cryptonite-0.27
+  - cryptostore-0.2.1.0
+  - text-1.2.4.0
+  - time-1.8.0.4
+  - HDBC-2.4.0.3
+  - HDBC-odbc-2.6.0.0
+  - x509-1.7.5
 
 extra-lib-dirs:
   - src/

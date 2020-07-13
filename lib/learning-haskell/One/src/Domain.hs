@@ -26,20 +26,22 @@ module Domain (
    - @version 2020-05-12T17:16:00.000EDT
    -}
 
-  type Key = String
+  import qualified Data.Text (Text)
+
+  type Key = Data.Text.Text
   type AccountID = Key
   type ThirdPartyID = Key
   type Purpose = Key
   type FileLocationPurpose = Purpose
   type EmailPurpose = Purpose
-  type Secret = String
+  type Secret = Data.Text.Text
   type Token = (Key, Secret)
   type UserToken = Token
   type AppToken = Token
-  type URL = String
+  type URL = Data.Text.Text
   type Credential = (URL, AppToken, UserToken)
   data FileAccess = None | Read | Write deriving (Eq,Ord,Enum,Show)
-  type Path = String
+  type Path = Data.Text
   type FileLocation = (FileLocationPurpose, Path, FileAccess)
   type FileLocations = [ FileLocation ]
   type Account = (AccountID, ThirdPartyID, Credential, FileLocations)

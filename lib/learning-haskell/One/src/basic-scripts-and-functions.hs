@@ -1,10 +1,10 @@
-{-##############################################
+{-
 
 A Haskell script
 is when everything is considered a program 
 except or those lines marked to be a comment.
 
-##############################################-}
+-}
 
 
 doubleMe x = x + x

@@ -1,6 +1,6 @@
-name:                One
-version:             0.1.0.1
-github:              "aev-mambro2/mambro/lib/learning-haskell/One"
+name:                ambigen
+version:             0.1.0.0
+github:              "aev-mambro2/ambigen"
 license:             BSD3
 author:              "A.E.Veltstra"
 maintainer:          "aev@sdf.org"
@@ -11,41 +11,39 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Teaching myself how haskell projects work.
-# category:            Education 
+# synopsis:            Short description of your package
+# category:            Music Generation
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/aev-mambro2/mambro/lib/learning-haskell/One#readme>
+description:         Please see the README on GitHub at <https://github.com/aev-mambro2/ambigen#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- time
+- text
 
 library:
   source-dirs: src
 
 executables:
-  One-exe:
+  ambigen-exe:
     main:                Main.hs
-    source-dirs:         src
+    source-dirs:         app
     ghc-options:
     - -threaded
-    - -dynamic
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - One
+    - ambigen
 
 tests:
-  One-test:
+  ambigen-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
     - -threaded
-    - -dynamic
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - One
+    - ambigen
