@@ -1,0 +1,1 @@
+writeFiles ((x: xs), outPattern)

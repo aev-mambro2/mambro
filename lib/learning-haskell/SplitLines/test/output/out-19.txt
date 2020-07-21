@@ -1,0 +1,1 @@
+  | length t == 1 = outputFile ((head t), outPattern, 1)

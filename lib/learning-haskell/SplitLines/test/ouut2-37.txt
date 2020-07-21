@@ -1,0 +1,1 @@
+-- Name pattern should be a pattern for a file path. It should

@@ -1,0 +1,1 @@
+-- Output file pattern: see the function outputFile.
