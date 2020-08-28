@@ -1,1 +1,0 @@
-writeFiles (t, outPattern)

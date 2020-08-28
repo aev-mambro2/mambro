@@ -1,1 +1,0 @@
--- |Writes each contents into its own file. If the file 

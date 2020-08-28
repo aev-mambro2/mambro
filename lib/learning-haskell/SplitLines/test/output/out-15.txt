@@ -1,1 +1,0 @@
--- |Params: input file path, output file path pattern.
