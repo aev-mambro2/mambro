@@ -3,7 +3,7 @@
 ///
 /// Author: A.E.Veltstra
 /// Since: 2.19.501.900
-/// Version: 2.20.226.1945
+/// Version: 2.20.1103.1006
 ///
 //The 1 method in this module returns a Result.
 use Result;
@@ -26,10 +26,14 @@ extern crate sqlite;
 /// assert!(maybe_connection.is_ok());
 ///
 /// ```
+///
+/// # Throws
+/// Error if the data store cannot be found or opened.
 pub fn try_connect() -> Result<sqlite::Connection, sqlite::Error> {
-    //fetch the database locator
+    //Set the database locator.
+    //Note: the locator requires an absolute path (no ~ links).
     let database_url = "/home/dave/dev/mambro/data/db.sqlite3";
 
-    //attempt to create and return the db connection
+    //Attempt to create and return the db connection.
     sqlite::open(&database_url)
 }
