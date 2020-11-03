@@ -1,1 +1,0 @@
-                   writeFiles ((tail t), outPattern)

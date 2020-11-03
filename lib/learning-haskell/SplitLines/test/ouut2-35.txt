@@ -1,1 +1,0 @@
---   pattern with -#.txt, in which # is replaced with the passed-

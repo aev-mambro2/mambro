@@ -1,1 +1,0 @@
-  = writeFile (namePattern ++ "-" ++ (show seq) ++ ".txt") contents
